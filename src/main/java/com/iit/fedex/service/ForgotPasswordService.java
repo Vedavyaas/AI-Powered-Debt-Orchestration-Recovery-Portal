@@ -75,5 +75,23 @@ public class ForgotPasswordService {
 
         return "Password reset successfully";
     }
+
+    public String resetPasswordDirect(String email, String newPassword) {
+        Optional<JWTLoginEntity> userOpt = jwtLoginRepository.findByEmail(email);
+        if (userOpt.isEmpty()) {
+            return "User not found";
+        }
+
+        JWTLoginEntity user = userOpt.get();
+        user.setPassword(passwordEncoder.encode(newPassword));
+        jwtLoginRepository.save(user);
+
+        return "Password reset successfully";
+    }
+
+    public boolean validateResetToken(String email, String token) {
+        String storedToken = resetTokens.get(email);
+        return storedToken != null && storedToken.equals(token);
+    }
 }
 

@@ -65,14 +65,89 @@ public class AuthController {
 
     @PostMapping("/refresh")
     public ResponseEntity<AuthResponse> refreshToken(@RequestBody RefreshTokenRequest request) {
+        Map<String, String> response = new HashMap<>();
+        
         // Check if token is blacklisted
         if (tokenBlacklist.containsKey(request.token())) {
-            return ResponseEntity.status(401).build();
+            response.put("error", "Token is invalid or expired");
+            return ResponseEntity.status(401).body(null);
         }
         
-        // For simplicity, re-authenticate the user
-        // In production, you'd decode the JWT and extract user info
-        return ResponseEntity.ok(null);
+        // Extract email from the current authentication context or decode from token
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        JWTLoginEntity user = jwtLoginRepository.findByEmail(email).orElse(null);
+        
+        if (user == null) {
+            response.put("error", "User not found");
+            return ResponseEntity.status(404).body(null);
+        }
+        
+        // Generate new tokens using LoginService
+        try {
+            LoginRequest loginRequest = new LoginRequest(user.getEmail(), "");
+            AuthResponse authResponse = loginService.login(loginRequest);
+            return ResponseEntity.ok(authResponse);
+        } catch (Exception e) {
+            response.put("error", "Failed to refresh token: " + e.getMessage());
+            return ResponseEntity.status(500).body(null);
+        }
+    }
+
+    @PostMapping("/validate")
+    public ResponseEntity<Map<String, Object>> validateToken(@RequestHeader("Authorization") String authHeader) {
+        Map<String, Object> response = new HashMap<>();
+        
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            response.put("valid", false);
+            response.put("error", "Invalid authorization header");
+            return ResponseEntity.status(401).body(response);
+        }
+        
+        String token = authHeader.substring(7);
+        
+        // Check if token is blacklisted
+        if (tokenBlacklist.containsKey(token)) {
+            response.put("valid", false);
+            response.put("error", "Token is revoked");
+            return ResponseEntity.status(401).body(response);
+        }
+        
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        JWTLoginEntity user = jwtLoginRepository.findByEmail(email).orElse(null);
+        
+        if (user == null) {
+            response.put("valid", false);
+            response.put("error", "User not found");
+            return ResponseEntity.status(401).body(response);
+        }
+        
+        response.put("valid", true);
+        response.put("email", user.getEmail());
+        response.put("role", user.getRole().name());
+        response.put("agencyId", user.getAgencyId());
+        
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/password-reset-confirm")
+    public ResponseEntity<Map<String, String>> passwordResetConfirm(
+            @RequestParam String email,
+            @RequestParam String newPassword) {
+        Map<String, String> response = new HashMap<>();
+        
+        JWTLoginEntity user = jwtLoginRepository.findByEmail(email).orElse(null);
+        
+        if (user == null) {
+            response.put("error", "User not found");
+            return ResponseEntity.status(404).body(response);
+        }
+        
+        // Update password
+        user.setPassword(passwordEncoder.encode(newPassword));
+        jwtLoginRepository.save(user);
+        
+        response.put("message", "Password reset successfully");
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/change-password")
