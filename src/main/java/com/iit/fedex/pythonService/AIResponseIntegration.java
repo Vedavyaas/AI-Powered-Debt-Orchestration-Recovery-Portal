@@ -34,7 +34,6 @@ public class AIResponseIntegration {
         debtCaseEntities.addAll(debtCaseRepository.findByStatus(Status.UN_ASSIGNED));
 
         if (debtCaseEntities.isEmpty()) {
-            logger.info("No cases to sync with AI service");
             return;
         }
 
@@ -43,11 +42,8 @@ public class AIResponseIntegration {
                 && debtCaseEntity.getPropensityScore() >= 0);
 
         if (debtCaseEntities.isEmpty()) {
-            logger.info("All cases already have propensity scores");
             return;
         }
-
-        logger.info("Sending {} cases to AI service for propensity scoring", debtCaseEntities.size());
 
         try {
             // Prepare data for Python service
@@ -83,11 +79,9 @@ public class AIResponseIntegration {
                             updatedCount++;
                         }
                     }
-                    logger.info("Successfully updated propensity scores for {} cases", updatedCount);
                 }
             }
         } catch (Exception e) {
-            logger.error("Error communicating with AI service: {}", e.getMessage());
             // Don't throw - scheduling should continue even if AI service is unavailable
         }
     }
@@ -116,7 +110,7 @@ public class AIResponseIntegration {
                 }
             }
         } catch (Exception e) {
-            logger.error("Error scoring case {}: {}", caseEntity.getInvoiceNumber(), e.getMessage());
+            // Silently ignore scoring failures
         }
         return null;
     }

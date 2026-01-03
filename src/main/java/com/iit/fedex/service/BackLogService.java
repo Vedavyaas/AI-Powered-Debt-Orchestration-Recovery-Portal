@@ -62,7 +62,6 @@ public class BackLogService {
             backLogRepository.save(log);
         } catch (Exception e) {
             // Don't let logging failures affect main operations
-            System.err.println("Failed to log async: " + e.getMessage());
         }
     }
 

@@ -45,7 +45,6 @@ public class AuditService {
             auditLogRepository.save(auditLog);
         } catch (Exception e) {
             // Don't let logging failures affect main operations
-            System.err.println("Failed to log audit action: " + e.getMessage());
         }
     }
 
