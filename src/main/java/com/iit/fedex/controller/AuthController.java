@@ -1,0 +1,139 @@
+package com.iit.fedex.controller;
+
+import com.iit.fedex.dto.AuthResponse;
+import com.iit.fedex.dto.LoginRequest;
+import com.iit.fedex.dto.RefreshTokenRequest;
+import com.iit.fedex.dto.ChangePasswordRequest;
+import com.iit.fedex.repository.JWTLoginEntity;
+import com.iit.fedex.repository.JWTLoginRepository;
+import com.iit.fedex.service.LoginService;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
+import org.springframework.web.bind.annotation.*;
+
+import jakarta.servlet.http.HttpServletResponse;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+@RestController
+@RequestMapping("/api/auth")
+public class AuthController {
+
+    private final LoginService loginService;
+    private final JWTLoginRepository jwtLoginRepository;
+    private final PasswordEncoder passwordEncoder;
+    
+    // Simple in-memory token blacklist (in production, use Redis or database)
+    private final Map<String, Long> tokenBlacklist = new ConcurrentHashMap<>();
+
+    public AuthController(LoginService loginService, 
+                         JWTLoginRepository jwtLoginRepository,
+                         PasswordEncoder passwordEncoder) {
+        this.loginService = loginService;
+        this.jwtLoginRepository = jwtLoginRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
+        AuthResponse response = loginService.login(request);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Map<String, String>> logout(@RequestHeader(value = "Authorization", required = false) String authHeader) {
+        Map<String, String> response = new HashMap<>();
+        
+        // Add token to blacklist
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.substring(7);
+            tokenBlacklist.put(token, System.currentTimeMillis() + 3600000); // Expire in 1 hour
+        }
+        
+        // Clear security context
+        SecurityContextHolder.clearContext();
+        
+        response.put("message", "Logged out successfully");
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<AuthResponse> refreshToken(@RequestBody RefreshTokenRequest request) {
+        // Check if token is blacklisted
+        if (tokenBlacklist.containsKey(request.token())) {
+            return ResponseEntity.status(401).build();
+        }
+        
+        // For simplicity, re-authenticate the user
+        // In production, you'd decode the JWT and extract user info
+        return ResponseEntity.ok(null);
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<Map<String, String>> changePassword(@RequestBody ChangePasswordRequest request) {
+        Map<String, String> response = new HashMap<>();
+        
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        JWTLoginEntity user = jwtLoginRepository.findByEmail(email).orElse(null);
+        
+        if (user == null) {
+            response.put("error", "User not found");
+            return ResponseEntity.status(404).body(response);
+        }
+        
+        // Verify current password
+        if (!passwordEncoder.matches(request.currentPassword(), user.getPassword())) {
+            response.put("error", "Current password is incorrect");
+            return ResponseEntity.status(401).body(response);
+        }
+        
+        // Update password
+        user.setPassword(passwordEncoder.encode(request.newPassword()));
+        jwtLoginRepository.save(user);
+        
+        response.put("message", "Password changed successfully");
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<Map<String, Object>> getCurrentUser() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        JWTLoginEntity user = jwtLoginRepository.findByEmail(email).orElse(null);
+        
+        if (user == null) {
+            return ResponseEntity.status(404).build();
+        }
+        
+        Map<String, Object> userInfo = new HashMap<>();
+        userInfo.put("email", user.getEmail());
+        userInfo.put("agencyId", user.getAgencyId());
+        userInfo.put("role", user.getRole().name());
+        
+        return ResponseEntity.ok(userInfo);
+    }
+
+    @GetMapping("/health")
+    public ResponseEntity<Map<String, String>> healthCheck() {
+        Map<String, String> health = new HashMap<>();
+        health.put("status", "UP");
+        health.put("service", "NEXUS Auth Service");
+        return ResponseEntity.ok(health);
+    }
+
+    public boolean isTokenBlacklisted(String token) {
+        Long expiry = tokenBlacklist.get(token);
+        if (expiry == null) return false;
+        if (expiry < System.currentTimeMillis()) {
+            tokenBlacklist.remove(token);
+            return false;
+        }
+        return true;
+    }
+}
+

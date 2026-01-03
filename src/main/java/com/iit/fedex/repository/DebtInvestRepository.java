@@ -20,4 +20,14 @@ public interface DebtInvestRepository extends JpaRepository<DebtInvestEntity,Lon
     @Query("update DebtInvestEntity d set d.message = :message where d.caseEntity = :caseEntity")
     @Modifying
     void updateMessageByCaseEntity(String message, DebtCaseEntity caseEntity);
+
+    long countByStage(Stage stage);
+
+    List<DebtInvestEntity> findByStage(Stage stage);
+
+    @Query("SELECT di FROM DebtInvestEntity di WHERE di.assignedToEmail = :email AND di.stage = :stage")
+    List<DebtInvestEntity> findByAssignedToEmailAndStage(String email, Stage stage);
+
+    @Query("SELECT COUNT(di) FROM DebtInvestEntity di WHERE di.stage = :stage")
+    long countByStageEnum(Stage stage);
 }

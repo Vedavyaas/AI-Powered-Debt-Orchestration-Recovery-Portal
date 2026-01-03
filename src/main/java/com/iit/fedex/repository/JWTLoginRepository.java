@@ -19,4 +19,8 @@ public interface JWTLoginRepository extends JpaRepository<JWTLoginEntity, Long> 
     void updateAgencyIdByEmail(String agencyId, String email);
 
     List<JWTLoginEntity> findAllByAgencyIdAndRole(String agencyId, Role role);
+
+    List<JWTLoginEntity> findByAgencyId(String agencyId);
+
+    long countByAgencyIdAndRole(String agencyId, Role role);
 }
