@@ -1,7 +1,7 @@
 package com.iit.fedex.aspect;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.iit.fedex.entity.BackLogEntity;
+import com.iit.fedex.repository.BackLogEntity;
 import com.iit.fedex.repository.BackLogRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import org.aspectj.lang.ProceedingJoinPoint;

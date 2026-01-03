@@ -1,4 +1,4 @@
-package com.iit.fedex.entity;
+package com.iit.fedex.repository;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
