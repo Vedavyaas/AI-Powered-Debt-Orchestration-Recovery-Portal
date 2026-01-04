@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { api } from '../api.js'
+import EvaluatorNotes from '../components/EvaluatorNotes.jsx'
 
 const STAGES = ['PENDING', 'IN_PROGRESS', 'DISPUTED', 'COLLECTED']
 
@@ -149,6 +150,8 @@ export default function MyDebtsPage() {
           </div>
         ) : null}
       </div>
+
+      <EvaluatorNotes page="My Debts" />
     </div>
   )
 }

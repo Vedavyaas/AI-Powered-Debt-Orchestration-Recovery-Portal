@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react'
 import { api } from '../api.js'
+import EvaluatorNotes from '../components/EvaluatorNotes.jsx'
 
 function isPlainObject(v) {
   return v !== null && typeof v === 'object' && !Array.isArray(v)
@@ -225,6 +226,8 @@ export default function ExportPage() {
           ) : null}
         </div>
       </div>
+
+      <EvaluatorNotes page="Export" />
     </div>
   )
 }

@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { api } from '../api.js'
+import EvaluatorNotes from '../components/EvaluatorNotes.jsx'
 
 function money(v) {
   if (v === null || v === undefined || v === '') return '—'
@@ -195,6 +196,8 @@ export default function CsvUploadPage() {
           <CaseTable rows={rows} selected={selected} onToggle={toggle} />
         </div>
       </div>
+
+      <EvaluatorNotes page="CSV Upload" />
     </div>
   )
 }

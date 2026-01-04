@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { api } from '../api.js'
 import ResultView from '../components/ResultView.jsx'
+import EvaluatorNotes from '../components/EvaluatorNotes.jsx'
 
 export default function ManagerTasksPage() {
   const [loading, setLoading] = useState(false)
@@ -89,6 +90,8 @@ export default function ManagerTasksPage() {
           </div>
         ) : null}
       </div>
+
+      <EvaluatorNotes page="Manager Tasks" />
     </div>
   )
 }

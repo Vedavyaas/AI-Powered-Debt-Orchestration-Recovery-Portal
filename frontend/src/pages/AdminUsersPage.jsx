@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { api } from '../api.js'
 import ResultView from '../components/ResultView.jsx'
+import EvaluatorNotes from '../components/EvaluatorNotes.jsx'
 
 const ROLES = ['FEDEX_ADMIN', 'DCA_MANAGER', 'DCA_AGENT']
 
@@ -109,6 +110,8 @@ export default function AdminUsersPage() {
           </div>
         ) : null}
       </div>
+
+      <EvaluatorNotes page="Admin Users" />
     </div>
   )
 }

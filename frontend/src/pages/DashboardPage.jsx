@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { api } from '../api.js'
+import EvaluatorNotes from '../components/EvaluatorNotes.jsx'
 
 function StatCard({ title, value }) {
   return (
@@ -51,6 +52,8 @@ export default function DashboardPage() {
           <StatCard title="Portfolio value" value={stats.totalPortfolioValue} />
         </div>
       ) : null}
+
+      <EvaluatorNotes page="Dashboard" />
     </div>
   )
 }

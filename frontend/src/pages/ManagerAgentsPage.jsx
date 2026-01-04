@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { api } from '../api.js'
 import ResultView from '../components/ResultView.jsx'
+import EvaluatorNotes from '../components/EvaluatorNotes.jsx'
 
 export default function ManagerAgentsPage() {
   const [loading, setLoading] = useState(false)
@@ -58,6 +59,8 @@ export default function ManagerAgentsPage() {
           </div>
         ) : null}
       </div>
+
+      <EvaluatorNotes page="Manager Agents" />
     </div>
   )
 }

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api, clearToken } from '../api.js'
+import EvaluatorNotes from '../components/EvaluatorNotes.jsx'
 
 export default function ProfilePage() {
   const navigate = useNavigate()
@@ -143,6 +144,8 @@ export default function ProfilePage() {
           </div>
         </div>
       ) : null}
+
+      <EvaluatorNotes page="Profile" />
     </div>
   )
 }

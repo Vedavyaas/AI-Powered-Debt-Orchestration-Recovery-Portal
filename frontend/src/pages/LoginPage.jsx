@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { api, setToken } from '../api.js'
+import EvaluatorNotes from '../components/EvaluatorNotes.jsx'
 
 export default function LoginPage({ onLoggedIn }) {
   const navigate = useNavigate()
@@ -36,6 +37,20 @@ export default function LoginPage({ onLoggedIn }) {
           Use your account email and password.
         </div>
 
+        <div
+          style={{
+            border: '1px solid var(--border)',
+            borderRadius: 14,
+            padding: 12,
+            marginBottom: 14,
+            background: 'var(--panel-solid)',
+            boxShadow: 'var(--shadow-inset)'
+          }}
+        >
+          <div style={{ fontWeight: 700, marginBottom: 4 }}>Evaluator info</div>
+          <div className="muted">Sample credentials and a quick walkthrough are listed at the bottom of each page.</div>
+        </div>
+
         <form onSubmit={onSubmit}>
           <div style={{ marginBottom: 12 }}>
             <label className="label">Email</label>
@@ -56,6 +71,8 @@ export default function LoginPage({ onLoggedIn }) {
           <Link className="muted" to="/forgot-password">Forgot password?</Link>
         </div>
       </div>
+
+      <EvaluatorNotes page="Login" />
     </div>
   )
 }

@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { api } from '../api.js'
+import EvaluatorNotes from '../components/EvaluatorNotes.jsx'
 
 export default function DebtSearchPage() {
   const [invoiceNumber, setInvoiceNumber] = useState('')
@@ -89,6 +90,8 @@ export default function DebtSearchPage() {
           </div>
         </div>
       ) : null}
+
+      <EvaluatorNotes page="Debt Search" />
     </div>
   )
 }

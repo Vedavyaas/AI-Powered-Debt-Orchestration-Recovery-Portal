@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { api } from '../api.js'
+import EvaluatorNotes from '../components/EvaluatorNotes.jsx'
 
 export default function ForgotPasswordPage() {
   const navigate = useNavigate()
@@ -102,6 +103,8 @@ export default function ForgotPasswordPage() {
         {error ? <div className="error" style={{ marginTop: 12 }}>{error}</div> : null}
         {message ? <div style={{ marginTop: 12 }}>{message}</div> : null}
       </div>
+
+      <EvaluatorNotes page="Forgot Password" />
     </div>
   )
 }

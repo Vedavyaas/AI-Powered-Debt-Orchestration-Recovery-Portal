@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { api } from '../api.js'
+import EvaluatorNotes from '../components/EvaluatorNotes.jsx'
 
 const ROLES = ['FEDEX_ADMIN', 'DCA_MANAGER', 'DCA_AGENT']
 
@@ -149,6 +150,8 @@ export default function SignupPage() {
         {error ? <div className="error" style={{ marginTop: 12 }}>{error}</div> : null}
         {message ? <div style={{ marginTop: 12 }}>{message}</div> : null}
       </div>
+
+      <EvaluatorNotes page="Signup" />
     </div>
   )
 }

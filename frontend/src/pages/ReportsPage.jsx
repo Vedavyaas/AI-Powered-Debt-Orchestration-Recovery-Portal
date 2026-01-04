@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { api } from '../api.js'
+import EvaluatorNotes from '../components/EvaluatorNotes.jsx'
 
 function isPlainObject(v) {
   return v !== null && typeof v === 'object' && !Array.isArray(v)
@@ -161,6 +162,8 @@ export default function ReportsPage() {
         <h3 style={{ marginTop: 0 }}>{title || 'Result'}</h3>
         {data === null ? <div className="muted">Pick a report</div> : <ResultView value={data} />}
       </div>
+
+      <EvaluatorNotes page="Reports" />
     </div>
   )
 }

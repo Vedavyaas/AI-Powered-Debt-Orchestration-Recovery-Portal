@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { api } from '../api.js'
 import ResultView from '../components/ResultView.jsx'
+import EvaluatorNotes from '../components/EvaluatorNotes.jsx'
 
 const STATUSES = ['ASSIGNED', 'UN_ASSIGNED', 'ASSIGNED_AND_WAITING']
 
@@ -210,6 +211,8 @@ export default function DebtOpsPage() {
           </div>
         ) : null}
       </div>
+
+      <EvaluatorNotes page="Debt Ops" />
     </div>
   )
 }

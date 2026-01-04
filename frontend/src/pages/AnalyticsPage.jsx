@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { api } from '../api.js'
 import ResultView from '../components/ResultView.jsx'
+import EvaluatorNotes from '../components/EvaluatorNotes.jsx'
 
 export default function AnalyticsPage() {
   const [loading, setLoading] = useState(false)
@@ -41,6 +42,8 @@ export default function AnalyticsPage() {
           <ResultView data={data} />
         </div>
       ) : null}
+
+      <EvaluatorNotes page="Analytics" />
     </div>
   )
 }
