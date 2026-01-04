@@ -163,5 +163,91 @@ export const api = {
 
   agentGetDebts: () => request('/get/debts'),
   agentChangeStage: ({ invoiceNumber, stage }) => request(`/put/stage?invoiceNumber=${encodeURIComponent(invoiceNumber)}&stage=${encodeURIComponent(stage)}`, { method: 'PUT' }),
-  agentChangeMessage: ({ invoiceNumber, message }) => request(`/put/message?invoiceNumber=${encodeURIComponent(invoiceNumber)}&message=${encodeURIComponent(message)}`, { method: 'PUT' })
+  agentChangeMessage: ({ invoiceNumber, message }) => request(`/put/message?invoiceNumber=${encodeURIComponent(invoiceNumber)}&message=${encodeURIComponent(message)}`, { method: 'PUT' }),
+
+  csvUpload: (file) => {
+    const form = new FormData()
+    form.append('file', file)
+    return request('/put/CSV', { method: 'POST', body: form })
+  },
+  csvList: () => request('/get/CSV'),
+  csvAssignToAgency: ({ agencyID, invoiceNumber }) => request('/put/assignedTo', {
+    method: 'PUT',
+    body: JSON.stringify({ agencyID, invoiceNumber })
+  }),
+
+  // AI
+  aiHealth: () => request('/api/ai/health'),
+  aiScore: (invoiceNumber) => request(`/api/ai/score/${encodeURIComponent(invoiceNumber)}`),
+  aiScoreBatch: (invoiceNumbers) => request('/api/ai/score/batch', { method: 'POST', body: JSON.stringify(invoiceNumbers) }),
+  aiScoreAllUnassigned: () => request('/api/ai/score/all-unassigned', { method: 'POST' }),
+  aiTopScores: ({ limit = 10 } = {}) => request(`/api/ai/score/top/${encodeURIComponent(limit)}`),
+  aiScoreStatistics: () => request('/api/ai/score/statistics'),
+
+  // Analytics
+  analyticsCollections: () => request('/admin/stats/collections'),
+  analyticsAgentPerformance: () => request('/admin/stats/agent-performance'),
+
+  // Backlog
+  backlogAll: ({ page = 0, size = 20 } = {}) => request(`/backlog?page=${encodeURIComponent(page)}&size=${encodeURIComponent(size)}`),
+  backlogFailed: ({ page = 0, size = 20 } = {}) => request(`/backlog/failed?page=${encodeURIComponent(page)}&size=${encodeURIComponent(size)}`),
+  backlogSummary: ({ hours = 24 } = {}) => request(`/backlog/summary?hours=${encodeURIComponent(hours)}`),
+  backlogModuleStats: ({ hours = 24 } = {}) => request(`/backlog/stats/module?hours=${encodeURIComponent(hours)}`),
+  backlogActionStats: ({ hours = 24 } = {}) => request(`/backlog/stats/action?hours=${encodeURIComponent(hours)}`),
+  backlogByUser: (userEmail) => request(`/backlog/user/${encodeURIComponent(userEmail)}`),
+  backlogByModule: (module) => request(`/backlog/module/${encodeURIComponent(module)}`),
+  backlogByAction: (action) => request(`/backlog/action/${encodeURIComponent(action)}`),
+  backlogByEntity: ({ entityType, entityId }) => request(`/backlog/entity/${encodeURIComponent(entityType)}/${encodeURIComponent(entityId)}`),
+  backlogRange: ({ start, end, page = 0, size = 20 }) => request(`/backlog/range?start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}&page=${encodeURIComponent(page)}&size=${encodeURIComponent(size)}`),
+  backlogSearch: ({ module, action, userEmail, start, end, page = 0, size = 20 }) => {
+    const params = new URLSearchParams()
+    if (module) params.set('module', module)
+    if (action) params.set('action', action)
+    if (userEmail) params.set('userEmail', userEmail)
+    params.set('start', start)
+    params.set('end', end)
+    params.set('page', String(page))
+    params.set('size', String(size))
+    return request(`/backlog/search?${params.toString()}`)
+  },
+  backlogById: (id) => request(`/backlog/${encodeURIComponent(id)}`),
+  backlogCreate: ({ action, module, description, performedBy, ipAddress, success }) => request('/backlog', {
+    method: 'POST',
+    body: JSON.stringify({ action, module, description, performedBy, ipAddress, success })
+  }),
+  backlogUserRecent: ({ userEmail, hours = 24 } = {}) => request(`/backlog/user/${encodeURIComponent(userEmail)}/recent?hours=${encodeURIComponent(hours)}`),
+
+  // Admin users
+  adminUsersList: () => request('/api/admin/users/list'),
+  adminUsersListByRole: (role) => request(`/api/admin/users/list/${encodeURIComponent(role)}`),
+  adminUsersListByAgency: (agencyId) => request(`/api/admin/users/agency/${encodeURIComponent(agencyId)}`),
+  adminUsersCount: () => request('/api/admin/users/count'),
+  adminUsersSearch: (query) => request(`/api/admin/users/search?query=${encodeURIComponent(query)}`),
+  adminUsersUpdateRole: ({ email, role }) => request('/api/admin/users/update-role', { method: 'PUT', body: JSON.stringify({ email, role }) }),
+  adminUsersUpdateAgency: ({ email, agencyId }) => request('/api/admin/users/update-agency', { method: 'PUT', body: JSON.stringify({ email, agencyId }) }),
+  adminUsersDelete: (email) => request(`/api/admin/users/delete/${encodeURIComponent(email)}`, { method: 'DELETE' }),
+
+  // Manager agent management
+  managerAgentsList: () => request('/api/manager/agents/list'),
+  managerAgentsPerformance: () => request('/api/manager/agents/performance'),
+  managerAgentsWorkload: () => request('/api/manager/agents/workload'),
+  managerAgentsDetails: (email) => request(`/api/manager/agents/details/${encodeURIComponent(email)}`),
+  managerAgentsDeactivate: (email) => request(`/api/manager/agents/deactivate/${encodeURIComponent(email)}`, { method: 'PUT' }),
+  managerAgentsActivate: (email) => request(`/api/manager/agents/activate/${encodeURIComponent(email)}`, { method: 'PUT' }),
+
+  // DCA manager tasks
+  managerGetTasks: () => request('/get/tasks'),
+  managerAssignDebt: ({ invoiceNumber, agentEmail }) => request('/debt/assign', { method: 'POST', body: JSON.stringify({ invoiceNumber, agentEmail }) }),
+
+  // Debt operations (advanced)
+  debtCaseDetails: (invoiceNumber) => request(`/debt/case/${encodeURIComponent(invoiceNumber)}/details`),
+  debtSearch: (payload) => request('/debt/search', { method: 'GET', body: JSON.stringify(payload || null) }),
+  debtHighValue: ({ minAmount = 10000 } = {}) => request(`/debt/high-value?minAmount=${encodeURIComponent(minAmount)}`),
+  debtOverdue: ({ minDays = 30 } = {}) => request(`/debt/overdue?minDays=${encodeURIComponent(minDays)}`),
+  debtStats: () => request('/debt/stats'),
+  debtDateRange: ({ startDate, endDate }) => request(`/debt/date-range?startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}`),
+  debtStatusHistory: (invoiceNumber) => request(`/debt/status-history/${encodeURIComponent(invoiceNumber)}`),
+  debtBulkStatus: ({ invoiceNumbers, newStatus, assignedTo }) => request('/debt/bulk/status', { method: 'POST', body: JSON.stringify({ invoiceNumbers, newStatus, assignedTo }) }),
+  debtBulkStage: ({ invoiceNumbers, stage }) => request('/debt/bulk/stage', { method: 'POST', body: JSON.stringify({ invoiceNumbers, stage }) }),
+  debtBulkAssign: ({ invoiceNumbers, agentEmail }) => request('/debt/bulk/assign', { method: 'POST', body: JSON.stringify({ invoiceNumbers, agentEmail }) })
 }

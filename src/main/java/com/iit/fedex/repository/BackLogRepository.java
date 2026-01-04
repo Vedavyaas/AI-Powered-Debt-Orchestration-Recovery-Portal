@@ -55,5 +55,12 @@ public interface BackLogRepository extends JpaRepository<BackLogEntity, Long> {
             @Param("start") LocalDateTime start,
             @Param("end") LocalDateTime end,
             Pageable pageable);
+
+    boolean existsByModuleAndActionAndEntityTypeAndEntityId(
+           String module,
+           String action,
+           String entityType,
+           String entityId
+    );
 }
 

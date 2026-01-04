@@ -31,5 +31,12 @@ public interface AuditLogRepository extends JpaRepository<AuditLogEntity, Long> 
     
     @Query("SELECT a.entityType, COUNT(a) FROM AuditLogEntity a WHERE a.timestamp >= :since GROUP BY a.entityType")
     List<Object[]> countByEntityTypeSince(@Param("since") LocalDateTime since);
+
+    boolean existsByUserEmailAndActionAndEntityTypeAndEntityId(
+            String userEmail,
+            String action,
+            String entityType,
+            String entityId
+    );
 }
 

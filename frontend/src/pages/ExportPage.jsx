@@ -5,6 +5,12 @@ function isPlainObject(v) {
   return v !== null && typeof v === 'object' && !Array.isArray(v)
 }
 
+function describeComposite(v) {
+  if (Array.isArray(v)) return `${v.length} item${v.length === 1 ? '' : 's'}`
+  if (isPlainObject(v)) return 'Object'
+  return ''
+}
+
 function prettyScalar(v) {
   if (v === null || v === undefined) return '—'
   if (typeof v === 'boolean') return v ? 'Yes' : 'No'
@@ -25,7 +31,7 @@ function KeyValueCard({ title, value }) {
               <React.Fragment key={k}>
                 <div className="muted" style={{ padding: '10px 12px', borderBottom: '1px solid var(--border)' }}>{k}</div>
                 <div style={{ padding: '10px 12px', borderBottom: '1px solid var(--border)', wordBreak: 'break-word' }}>
-                  {isPlainObject(v) || Array.isArray(v) ? <span className="muted">{JSON.stringify(v)}</span> : prettyScalar(v)}
+                  {isPlainObject(v) || Array.isArray(v) ? <span className="muted">{describeComposite(v)}</span> : prettyScalar(v)}
                 </div>
               </React.Fragment>
             ))}

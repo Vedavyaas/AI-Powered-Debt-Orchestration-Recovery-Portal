@@ -13,6 +13,14 @@ import AuditPage from './pages/AuditPage.jsx'
 import ReportsPage from './pages/ReportsPage.jsx'
 import ExportPage from './pages/ExportPage.jsx'
 import MyDebtsPage from './pages/MyDebtsPage.jsx'
+import CsvUploadPage from './pages/CsvUploadPage.jsx'
+import AiPage from './pages/AiPage.jsx'
+import AnalyticsPage from './pages/AnalyticsPage.jsx'
+import BacklogPage from './pages/BacklogPage.jsx'
+import AdminUsersPage from './pages/AdminUsersPage.jsx'
+import ManagerAgentsPage from './pages/ManagerAgentsPage.jsx'
+import ManagerTasksPage from './pages/ManagerTasksPage.jsx'
+import DebtOpsPage from './pages/DebtOpsPage.jsx'
 
 export default function App() {
   const [user, setUser] = useState(null)
@@ -61,7 +69,15 @@ export default function App() {
           <Route path="/audit" element={<AuditPage />} />
           <Route path="/reports" element={<ReportsPage />} />
           <Route path="/export" element={<ExportPage />} />
+          <Route path="/csv-upload" element={<CsvUploadPage />} />
           <Route path="/my-debts" element={<MyDebtsPage />} />
+          <Route path="/ai" element={<AiPage />} />
+          <Route path="/analytics" element={<AnalyticsPage />} />
+          <Route path="/backlog" element={user?.role === 'FEDEX_ADMIN' ? <BacklogPage /> : <Navigate to="/dashboard" replace />} />
+          <Route path="/admin-users" element={<AdminUsersPage />} />
+          <Route path="/manager-agents" element={<ManagerAgentsPage />} />
+          <Route path="/manager-tasks" element={<ManagerTasksPage />} />
+          <Route path="/debt-ops" element={<DebtOpsPage />} />
         </Route>
 
         <Route path="*" element={<Navigate to={getToken() ? '/dashboard' : '/login'} replace />} />
