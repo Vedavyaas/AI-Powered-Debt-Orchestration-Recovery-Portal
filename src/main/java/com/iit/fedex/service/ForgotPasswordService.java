@@ -41,13 +41,13 @@ public class ForgotPasswordService {
 
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(email);
-        message.setSubject("NEXUS Platform | Password Reset Request");
+        message.setSubject("PHEONIX Platform | Password Reset Request");
         message.setText("Dear User,\n\n" +
-                "You have requested a password reset for your NEXUS account.\n\n" +
+            "You have requested a password reset for your PHEONIX account.\n\n" +
                 "Your reset code is: " + token + "\n\n" +
                 "Please use this code to reset your password within the next hour.\n\n" +
                 "Best Regards,\n" +
-                "NEXUS System Administrator\n" +
+            "PHEONIX System Administrator\n" +
                 "FedEx Global Recovery Team");
         message.setFrom("testingxyz123456@gmail.com");
 

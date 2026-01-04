@@ -60,7 +60,7 @@ public class DCAManagerService {
         mailMessage.setText("""
                 Hello,
                 
-                You have been assigned new debt recovery cases in the NEXUS Portal.
+            You have been assigned new debt recovery cases in the PHEONIX Portal.
                 Please log in to your dashboard to review the customer details, check the overdue invoices,
                 and begin the outreach process.
                 All communication logs and payment promises must be updated directly in the system.

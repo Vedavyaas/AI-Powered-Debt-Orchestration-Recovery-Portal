@@ -60,8 +60,11 @@ public class JWTConfig {
                 "/ai/**",
                 "/csv-upload/**",
                 "/reports/**",
+                "/export/**",
                 "/dashboard/**",
                 "/profile/**",
+                "/audit/**",
+                "/my-debts/**",
                 "/agents/**",
                 "/action/**"
             ).permitAll()

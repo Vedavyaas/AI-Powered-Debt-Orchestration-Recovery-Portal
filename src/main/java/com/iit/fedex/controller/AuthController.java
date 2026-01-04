@@ -197,7 +197,7 @@ public class AuthController {
     public ResponseEntity<Map<String, String>> healthCheck() {
         Map<String, String> health = new HashMap<>();
         health.put("status", "UP");
-        health.put("service", "NEXUS Auth Service");
+        health.put("service", "PHEONIX Auth Service");
         return ResponseEntity.ok(health);
     }
 

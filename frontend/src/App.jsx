@@ -9,6 +9,10 @@ import ForgotPasswordPage from './pages/ForgotPasswordPage.jsx'
 import DashboardPage from './pages/DashboardPage.jsx'
 import DebtSearchPage from './pages/DebtSearchPage.jsx'
 import ProfilePage from './pages/ProfilePage.jsx'
+import AuditPage from './pages/AuditPage.jsx'
+import ReportsPage from './pages/ReportsPage.jsx'
+import ExportPage from './pages/ExportPage.jsx'
+import MyDebtsPage from './pages/MyDebtsPage.jsx'
 
 export default function App() {
   const [user, setUser] = useState(null)
@@ -54,6 +58,10 @@ export default function App() {
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/debt-search" element={<DebtSearchPage />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/audit" element={<AuditPage />} />
+          <Route path="/reports" element={<ReportsPage />} />
+          <Route path="/export" element={<ExportPage />} />
+          <Route path="/my-debts" element={<MyDebtsPage />} />
         </Route>
 
         <Route path="*" element={<Navigate to={getToken() ? '/dashboard' : '/login'} replace />} />

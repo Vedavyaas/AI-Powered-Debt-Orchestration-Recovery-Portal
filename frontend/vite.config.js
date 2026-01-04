@@ -12,6 +12,8 @@ export default defineConfig(({ mode }) => ({
       '/backlog': 'http://localhost:8080',
       '/put': 'http://localhost:8080',
       '/get': 'http://localhost:8080',
+      '/change': 'http://localhost:8080',
+      '/delete': 'http://localhost:8080',
       '/login': 'http://localhost:8080',
       '/create': 'http://localhost:8080'
     }

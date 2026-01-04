@@ -1,12 +1,17 @@
 import React, { useEffect, useState } from 'react'
-import { api } from '../api.js'
+import { useNavigate } from 'react-router-dom'
+import { api, clearToken } from '../api.js'
 
 export default function ProfilePage() {
+  const navigate = useNavigate()
   const [profile, setProfile] = useState(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
+
+  const [agencyID, setAgencyID] = useState('')
+  const [accountBusy, setAccountBusy] = useState(false)
 
   useEffect(() => {
     let alive = true
@@ -44,6 +49,45 @@ export default function ProfilePage() {
     }
   }
 
+  const onChangeAgency = async (e) => {
+    e.preventDefault()
+    setError('')
+    setMessage('')
+    const value = agencyID.trim()
+    if (!value) {
+      setError('Enter an agency ID')
+      return
+    }
+    setAccountBusy(true)
+    try {
+      const res = await api.changeAgencyId(value)
+      setMessage(typeof res === 'string' ? res : 'Updated')
+    } catch (e) {
+      setError(e?.message || 'Update failed')
+    } finally {
+      setAccountBusy(false)
+    }
+  }
+
+  const onDeleteAccount = async () => {
+    setError('')
+    setMessage('')
+    const ok = window.confirm('Delete account? This cannot be undone.')
+    if (!ok) return
+
+    setAccountBusy(true)
+    try {
+      const res = await api.deleteAccount()
+      clearToken()
+      setMessage(typeof res === 'string' ? res : 'Account deleted')
+      navigate('/login', { replace: true })
+    } catch (e) {
+      setError(e?.message || 'Delete failed')
+    } finally {
+      setAccountBusy(false)
+    }
+  }
+
   return (
     <div className="container">
       <h2 style={{ marginTop: 10 }}>Profile</h2>
@@ -56,12 +100,12 @@ export default function ProfilePage() {
           <form onSubmit={onSave}>
             <div className="row">
               <div style={{ flex: 1, minWidth: 260 }}>
-                <label className="label">First name</label>
-                <input className="input" value={profile.firstName || ''} onChange={(e) => updateField('firstName', e.target.value)} />
+                <label className="label">Email</label>
+                <input className="input" value={profile.email || ''} readOnly />
               </div>
               <div style={{ flex: 1, minWidth: 260 }}>
-                <label className="label">Last name</label>
-                <input className="input" value={profile.lastName || ''} onChange={(e) => updateField('lastName', e.target.value)} />
+                <label className="label">Role</label>
+                <input className="input" value={profile.role || ''} readOnly />
               </div>
             </div>
 
@@ -69,10 +113,6 @@ export default function ProfilePage() {
               <div style={{ flex: 1, minWidth: 260 }}>
                 <label className="label">Phone</label>
                 <input className="input" value={profile.phone || ''} onChange={(e) => updateField('phone', e.target.value)} />
-              </div>
-              <div style={{ flex: 1, minWidth: 260 }}>
-                <label className="label">Title</label>
-                <input className="input" value={profile.title || ''} onChange={(e) => updateField('title', e.target.value)} />
               </div>
             </div>
 
@@ -84,6 +124,23 @@ export default function ProfilePage() {
               </button>
             </div>
           </form>
+
+          <div style={{ marginTop: 18, borderTop: '1px solid var(--border)', paddingTop: 16 }}>
+            <h3 style={{ marginTop: 0 }}>Account</h3>
+            <form onSubmit={onChangeAgency} className="row" style={{ alignItems: 'end' }}>
+              <div style={{ flex: 1, minWidth: 260 }}>
+                <label className="label">Agency ID</label>
+                <input className="input" value={agencyID} onChange={(e) => setAgencyID(e.target.value)} placeholder="Enter agency ID" />
+              </div>
+              <button className="button secondary" type="submit" disabled={accountBusy}>Change</button>
+            </form>
+
+            <div style={{ marginTop: 12 }}>
+              <button className="button" type="button" disabled={accountBusy} onClick={onDeleteAccount}>
+                Delete account
+              </button>
+            </div>
+          </div>
         </div>
       ) : null}
     </div>

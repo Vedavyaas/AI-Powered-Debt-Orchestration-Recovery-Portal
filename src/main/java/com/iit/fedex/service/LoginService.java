@@ -46,7 +46,7 @@ public class LoginService {
 
         Instant now = Instant.now();
         JwtClaimsSet claims = JwtClaimsSet.builder()
-                .issuer("nexus-fedex")
+            .issuer("pheonix-fedex")
                 .subject(request.getEmail())
                 .claim("role", role)
                 .issuedAt(now)
