@@ -163,7 +163,7 @@ public class ActionTrackingAspect {
         try {
             backLogRepository.save(backLog);
         } catch (Exception e) {
-            // Silently ignore logging failures
+//            logger.error("Failed to save backlog entry: {}", e.getMessage());
         }
 
         return result;
@@ -283,7 +283,7 @@ public class ActionTrackingAspect {
                 }
             }
         } catch (Exception e) {
-            // Silently ignore extraction failures
+//            logger.debug("Could not extract entity ID: {}", e.getMessage());
         }
         return null;
     }

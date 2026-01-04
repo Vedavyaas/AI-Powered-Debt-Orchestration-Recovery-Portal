@@ -29,11 +29,16 @@ public class CreateAccountService {
         return UUID.randomUUID().toString();
     }
     public String generateKey(String email) {
-        if(jwtLoginRepository.findByEmail(email).isPresent()){
+        String normalizedEmail = email == null ? "" : email.trim().toLowerCase();
+        if (normalizedEmail.isBlank()) {
+            return "Invalid email";
+        }
+
+        if (jwtLoginRepository.existsByEmailIgnoreCase(normalizedEmail)) {
             return "Email already exists";
         }
 
-        map.put(email, Key());
+        map.put(normalizedEmail, Key());
 
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(email);
@@ -42,7 +47,7 @@ public class CreateAccountService {
                 "You have been invited to join the NEXUS AI-Powered Debt Recovery Ecosystem. " +
                 "Our platform leverages advanced Spring Boot security and Python ML to streamline " +
                 "agency collaboration and recovery efficiency.\n\n" +
-                "Your secure access key is: " + map.get(email) + "\n\n" +
+                "Your secure access key is: " + map.get(normalizedEmail) + "\n\n" +
                 "Please use this key to complete your account registration on the NEXUS portal. " +
                 "This key is unique to your email and ensures 100% auditable access for compliance.\n\n" +
                 "Best Regards,\n" +
@@ -52,12 +57,20 @@ public class CreateAccountService {
 
         javaMailSender.send(message);
 
-        return "Mail sent successfully";
+        return "Code sent. Check your email.";
     }
 
     public String createAccount(JWTLoginEntity jwtLoginEntity, String key) {
         String email = jwtLoginEntity.getEmail();
-        if(key.equals(map.get(email))) {
+        String normalizedEmail = email == null ? "" : email.trim().toLowerCase();
+        if (normalizedEmail.isBlank()) {
+            return "Invalid email";
+        }
+        if (jwtLoginRepository.existsByEmailIgnoreCase(normalizedEmail)) {
+            return "Email already exists";
+        }
+
+        if(key != null && key.equals(map.get(normalizedEmail))) {
             com.iit.fedex.assets.Role role = jwtLoginEntity.getRole();
             if(role == null) {
                 role = com.iit.fedex.assets.Role.DCA_AGENT;
@@ -68,7 +81,8 @@ public class CreateAccountService {
                     role = com.iit.fedex.assets.Role.DCA_AGENT;
                 }
             }
-            map.remove(email);
+            map.remove(normalizedEmail);
+            jwtLoginEntity.setEmail(normalizedEmail);
             jwtLoginEntity.setRole(role);
             jwtLoginEntity.setPassword(passwordEncoder.encode(jwtLoginEntity.getPassword()));
             jwtLoginRepository.save(jwtLoginEntity);

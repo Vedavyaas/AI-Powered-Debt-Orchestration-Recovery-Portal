@@ -12,7 +12,11 @@ public interface JWTLoginRepository extends JpaRepository<JWTLoginEntity, Long> 
 
     Optional<JWTLoginEntity> findByEmail(String username);
 
+    Optional<JWTLoginEntity> findByEmailIgnoreCase(String email);
+
     boolean existsByEmail(String email);
+
+    boolean existsByEmailIgnoreCase(String email);
 
     @Query("UPDATE JWTLoginEntity j SET j.agencyId = :agencyId WHERE j.email = :email")
     @Modifying

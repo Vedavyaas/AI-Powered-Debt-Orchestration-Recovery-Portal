@@ -21,6 +21,7 @@ import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.http.HttpMethod;
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -36,9 +37,42 @@ public class JWTConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) {
         http
-                .authorizeHttpRequests(authorizeRequests -> authorizeRequests
-                        .requestMatchers("/h2-console/**","/login/**", "/create/**", "/get/OTP/**", "/forgot-password/**", "/reset-password/**").permitAll()
-                        .anyRequest().authenticated())
+        .authorizeHttpRequests(authorizeRequests -> authorizeRequests
+            // allow unauthenticated access to static SPA assets, auth endpoints and SPA routes
+            .requestMatchers(
+                "/",
+                "/index.html",
+                "/static/**",
+                "/assets/**",
+                "/favicon.ico",
+                "/manifest.json",
+                "/h2-console/**",
+                "/login/**",
+                "/create/**",
+                "/get/OTP/**",
+                "/forgot-password/**",
+                "/reset-password/**",
+                // SPA client-side routes (allow browser direct navigation to these)
+                "/home/**",
+                "/signup/**",
+                "/users/**",
+                "/debt-search/**",
+                "/ai/**",
+                "/csv-upload/**",
+                "/reports/**",
+                "/dashboard/**",
+                "/profile/**",
+                "/agents/**",
+                "/action/**"
+            ).permitAll()
+            .requestMatchers(HttpMethod.POST,
+                "/api/auth/login",
+                "/api/auth/forgot-password",
+                "/api/auth/reset-password",
+                "/api/auth/reset-password-confirm",
+                "/api/auth/validate-reset-token"
+            ).permitAll()
+            .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
                 .csrf(AbstractHttpConfigurer::disable)
                 .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable));
