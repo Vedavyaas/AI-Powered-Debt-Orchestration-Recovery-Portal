@@ -1,17 +1,18 @@
 :root {
-  /* macOS-like glass theme */
-  --bg: #f5f6f8;
-  --panel: rgba(255, 255, 255, 0.75);
-  --panel-solid: #ffffff;
-  --text: #0b0b0f;
-  --muted: rgba(11, 11, 15, 0.55);
-  --border: rgba(0, 0, 0, 0.10);
-  --border-strong: rgba(0, 0, 0, 0.16);
+  /* macOS Sequoia-like glass */
+  --bg: #f3f4f6;
+  --panel: rgba(255, 255, 255, 0.62);
+  --panel-solid: rgba(255, 255, 255, 0.92);
+  --text: rgba(12, 12, 16, 0.92);
+  --muted: rgba(12, 12, 16, 0.58);
+  --border: rgba(10, 10, 14, 0.10);
+  --border-strong: rgba(10, 10, 14, 0.16);
   --accent: #0a84ff;
   --accent-weak: rgba(10, 132, 255, 0.18);
   --danger: #d70015;
-  --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-  --shadow-soft: 0 2px 10px rgba(0, 0, 0, 0.06);
+  --shadow: 0 18px 46px rgba(0, 0, 0, 0.10);
+  --shadow-soft: 0 6px 18px rgba(0, 0, 0, 0.08);
+  --shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.55);
 
   font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", Segoe UI, Roboto, Helvetica, Arial, sans-serif;
   line-height: 1.4;
@@ -23,8 +24,10 @@
 body {
   margin: 0;
   background:
-    radial-gradient(900px 520px at 20% 0%, rgba(10, 132, 255, 0.14), transparent 60%),
-    radial-gradient(900px 520px at 90% 10%, rgba(48, 209, 88, 0.12), transparent 62%),
+    radial-gradient(1200px 700px at 8% 0%, rgba(10, 132, 255, 0.14), transparent 60%),
+    radial-gradient(1100px 650px at 92% 6%, rgba(175, 82, 222, 0.13), transparent 58%),
+    radial-gradient(900px 520px at 60% 105%, rgba(52, 199, 89, 0.10), transparent 58%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.00), rgba(0, 0, 0, 0.02)),
     var(--bg);
   color: var(--text);
 }
@@ -47,10 +50,14 @@ h2, h3 {
 .card {
   background: var(--panel);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 16px;
   box-shadow: var(--shadow-soft);
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(18px) saturate(1.25);
+  -webkit-backdrop-filter: blur(18px) saturate(1.25);
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.18));
+  box-shadow: var(--shadow-soft);
+  box-shadow: var(--shadow-soft), var(--shadow-inset);
 }
 
 .row {
@@ -81,7 +88,7 @@ h2, h3 {
   padding: 10px 12px;
   border: 1px solid var(--border-strong);
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.72);
   font-size: 14px;
   outline: none;
   color: var(--text);
@@ -105,6 +112,7 @@ h2, h3 {
   cursor: pointer;
   font-size: 14px;
   font-weight: 600;
+  box-shadow: 0 10px 18px rgba(10, 132, 255, 0.18);
 }
 
 .button:hover {
@@ -117,13 +125,13 @@ h2, h3 {
 }
 
 .button.secondary {
-  background: rgba(255, 255, 255, 0.65);
+  background: rgba(255, 255, 255, 0.58);
   color: var(--text);
   border-color: var(--border-strong);
 }
 
 .button.secondary:hover {
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.74);
 }
 
 
@@ -140,8 +148,9 @@ h2, h3 {
   position: sticky;
   top: 0;
   z-index: 10;
-  background: rgba(255, 255, 255, 0.55);
-  backdrop-filter: blur(14px);
+  background: rgba(255, 255, 255, 0.50);
+  backdrop-filter: blur(22px) saturate(1.35);
+  -webkit-backdrop-filter: blur(22px) saturate(1.35);
   border-bottom: 1px solid rgba(0, 0, 0, 0.10);
 }
 
@@ -182,7 +191,7 @@ h2, h3 {
   border-radius: 999px;
   padding: 7px 10px;
   font-size: 12px;
-  background: rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.50);
   color: rgba(11, 11, 15, 0.8);
 }
 
@@ -193,17 +202,17 @@ h2, h3 {
   border-radius: 999px;
   padding: 7px 10px;
   font-size: 12px;
-  background: rgba(255, 255, 255, 0.45);
+  background: rgba(255, 255, 255, 0.44);
   color: rgba(11, 11, 15, 0.85);
 }
 
 .navlink:hover {
-  background: rgba(255, 255, 255, 0.70);
+  background: rgba(255, 255, 255, 0.64);
 }
 
 .navlink.active {
   border-color: rgba(10, 132, 255, 0.35);
-  background: rgba(10, 132, 255, 0.14);
+  background: rgba(10, 132, 255, 0.16);
 }
 
 .muted {
