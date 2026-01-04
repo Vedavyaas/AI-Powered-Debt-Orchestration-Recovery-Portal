@@ -42,16 +42,16 @@ public class CreateAccountService {
 
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(email);
-        message.setSubject("PHEONIX Platform | Secure Access Invitation - FedEx DCA Management");
+        message.setSubject("NEXUS Platform | Secure Access Invitation - FedEx DCA Management");
         message.setText("Dear User,\n\n" +
-            "You have been invited to join the PHEONIX AI-Powered Debt Recovery Ecosystem. " +
+            "You have been invited to join the NEXUS AI-Powered Debt Recovery Ecosystem. " +
                 "Our platform leverages advanced Spring Boot security and Python ML to streamline " +
                 "agency collaboration and recovery efficiency.\n\n" +
                 "Your secure access key is: " + map.get(normalizedEmail) + "\n\n" +
-            "Please use this key to complete your account registration on the PHEONIX portal. " +
+            "Please use this key to complete your account registration on the NEXUS portal. " +
                 "This key is unique to your email and ensures 100% auditable access for compliance.\n\n" +
                 "Best Regards,\n" +
-            "PHEONIX System Administrator\n" +
+            "NEXUS System Administrator\n" +
                 "FedEx Global Recovery Team");
         message.setFrom("testingxyz123456@gmail.com");
 

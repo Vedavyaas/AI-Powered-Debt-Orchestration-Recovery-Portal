@@ -3,10 +3,10 @@ version: '3.8'
 services:
   db:
     image: mysql:8.0
-    container_name: pheonix-db
+    container_name: nexus-db
     restart: unless-stopped
     environment:
-      MYSQL_DATABASE: pheonix_db
+      MYSQL_DATABASE: nexus_db
       MYSQL_ROOT_PASSWORD: password
     ports:
       - "3306:3306"
@@ -24,7 +24,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: pheonix-app
+    container_name: nexus-app
     ports:
       - "8080:8080"
     depends_on:
@@ -32,7 +32,7 @@ services:
         condition: service_healthy
     restart: unless-stopped
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/pheonix_db?allowPublicKeyRetrieval=true&useSSL=false
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/nexus_db?allowPublicKeyRetrieval=true&useSSL=false
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: password
 

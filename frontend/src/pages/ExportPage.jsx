@@ -1,6 +1,43 @@
 import React, { useMemo, useState } from 'react'
 import { api } from '../api.js'
 
+function isPlainObject(v) {
+  return v !== null && typeof v === 'object' && !Array.isArray(v)
+}
+
+function prettyScalar(v) {
+  if (v === null || v === undefined) return '—'
+  if (typeof v === 'boolean') return v ? 'Yes' : 'No'
+  if (typeof v === 'number') return Number.isFinite(v) ? v.toLocaleString() : String(v)
+  return String(v)
+}
+
+function KeyValueCard({ title, value }) {
+  return (
+    <div className="card">
+      <h3 style={{ marginTop: 0 }}>{title}</h3>
+      {value === null || value === undefined ? (
+        <div className="muted">Not loaded</div>
+      ) : isPlainObject(value) ? (
+        <div style={{ border: '1px solid var(--border)', borderRadius: 14, overflow: 'hidden' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '240px 1fr' }}>
+            {Object.entries(value).map(([k, v]) => (
+              <React.Fragment key={k}>
+                <div className="muted" style={{ padding: '10px 12px', borderBottom: '1px solid var(--border)' }}>{k}</div>
+                <div style={{ padding: '10px 12px', borderBottom: '1px solid var(--border)', wordBreak: 'break-word' }}>
+                  {isPlainObject(v) || Array.isArray(v) ? <span className="muted">{JSON.stringify(v)}</span> : prettyScalar(v)}
+                </div>
+              </React.Fragment>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div style={{ wordBreak: 'break-word' }}>{prettyScalar(value)}</div>
+      )}
+    </div>
+  )
+}
+
 function downloadText(filename, text, mime) {
   const blob = new Blob([text || ''], { type: mime || 'text/plain;charset=utf-8' })
   const url = URL.createObjectURL(blob)
@@ -140,15 +177,8 @@ export default function ExportPage() {
           </div>
         </div>
 
-        <div className="card">
-          <h3 style={{ marginTop: 0 }}>Summary</h3>
-          {summary ? <pre style={{ margin: 0, overflowX: 'auto' }}>{JSON.stringify(summary, null, 2)}</pre> : <div className="muted">Not loaded</div>}
-        </div>
-
-        <div className="card">
-          <h3 style={{ marginTop: 0 }}>Count</h3>
-          {count ? <pre style={{ margin: 0, overflowX: 'auto' }}>{JSON.stringify(count, null, 2)}</pre> : <div className="muted">Not loaded</div>}
-        </div>
+        <KeyValueCard title="Summary" value={summary} />
+        <KeyValueCard title="Count" value={count} />
 
         <div className="card" style={{ gridColumn: '1 / -1' }}>
           <h3 style={{ marginTop: 0 }}>Preview (first 20)</h3>

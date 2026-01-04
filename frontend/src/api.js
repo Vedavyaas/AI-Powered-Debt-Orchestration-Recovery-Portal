@@ -31,14 +31,31 @@ async function request(path, options = {}) {
   })
 
   const contentType = res.headers.get('content-type') || ''
-  const isJson = contentType.includes('application/json')
-  const data = isJson ? await res.json().catch(() => null) : await res.text().catch(() => '')
+  const rawText = await res.text().catch(() => '')
+
+  let data = rawText
+  const looksLikeJson = rawText && (/^\s*\{/.test(rawText) || /^\s*\[/.test(rawText))
+  const isJson = contentType.includes('application/json') || contentType.includes('application/problem+json')
+  if (isJson || looksLikeJson) {
+    try {
+      data = rawText ? JSON.parse(rawText) : null
+    } catch {
+      data = rawText
+    }
+  }
 
   if (!res.ok) {
-    const message =
-      (typeof data === 'string' && data.trim()) ||
-      (data && typeof data === 'object' && (data.message || data.error)) ||
-      `Request failed (${res.status})`
+    const messageFromObject =
+      data &&
+      typeof data === 'object' &&
+      (data.message || data.error || data.detail || data.title || data.error_description || data.description)
+
+    const messageFromString =
+      typeof data === 'string' && data.trim() && !/^\s*<!doctype\s+html/i.test(data) && !/^\s*<html/i.test(data)
+        ? data.trim()
+        : ''
+
+    const message = messageFromString || messageFromObject || `Request failed (${res.status})`
     const err = new Error(message)
     err.status = res.status
     err.data = data

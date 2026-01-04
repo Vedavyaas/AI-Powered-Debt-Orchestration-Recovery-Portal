@@ -1,13 +1,98 @@
 import React, { useState } from 'react'
 import { api } from '../api.js'
 
-function JsonBlock({ value }) {
-  if (value === null || value === undefined) return null
+function isPlainObject(v) {
+  return v !== null && typeof v === 'object' && !Array.isArray(v)
+}
+
+function prettyScalar(v) {
+  if (v === null || v === undefined) return '—'
+  if (typeof v === 'boolean') return v ? 'Yes' : 'No'
+  if (typeof v === 'number') return Number.isFinite(v) ? v.toLocaleString() : String(v)
+  return String(v)
+}
+
+function KeyValueGrid({ title, obj }) {
+  if (!isPlainObject(obj)) return null
+  const entries = Object.entries(obj)
+  if (!entries.length) return <div className="muted">No data</div>
+
   return (
-    <pre style={{ margin: 0, overflowX: 'auto' }}>
-      {typeof value === 'string' ? value : JSON.stringify(value, null, 2)}
-    </pre>
+    <div style={{ border: '1px solid var(--border)', borderRadius: 14, overflow: 'hidden' }}>
+      {title ? <div style={{ padding: '10px 12px', borderBottom: '1px solid var(--border)' }} className="muted">{title}</div> : null}
+      <div style={{ display: 'grid', gridTemplateColumns: '240px 1fr' }}>
+        {entries.map(([k, v]) => (
+          <React.Fragment key={k}>
+            <div className="muted" style={{ padding: '10px 12px', borderBottom: '1px solid var(--border)' }}>{k}</div>
+            <div style={{ padding: '10px 12px', borderBottom: '1px solid var(--border)', wordBreak: 'break-word' }}>
+              {isPlainObject(v) || Array.isArray(v) ? (
+                <span className="muted">{JSON.stringify(v)}</span>
+              ) : (
+                prettyScalar(v)
+              )}
+            </div>
+          </React.Fragment>
+        ))}
+      </div>
+    </div>
   )
+}
+
+function DataTable({ rows }) {
+  if (!Array.isArray(rows) || rows.length === 0) return <div className="muted">No results</div>
+
+  const first = rows.find((r) => isPlainObject(r))
+  if (!first) {
+    return (
+      <div style={{ display: 'grid', gap: 8 }}>
+        {rows.slice(0, 50).map((r, idx) => (
+          <div key={idx} style={{ border: '1px solid var(--border)', borderRadius: 14, padding: 10, background: 'var(--panel-solid)' }}>
+            {prettyScalar(r)}
+          </div>
+        ))}
+      </div>
+    )
+  }
+
+  const columns = Object.keys(first).slice(0, 8)
+  const displayRows = rows.slice(0, 50)
+
+  return (
+    <div style={{ border: '1px solid var(--border)', borderRadius: 14, overflowX: 'auto' }}>
+      <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 760 }}>
+        <thead>
+          <tr>
+            {columns.map((c) => (
+              <th key={c} className="muted" style={{ textAlign: 'left', padding: '10px 12px', borderBottom: '1px solid var(--border)' }}>{c}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {displayRows.map((r, idx) => (
+            <tr key={idx}>
+              {columns.map((c) => {
+                const v = r?.[c]
+                const cell = isPlainObject(v) || Array.isArray(v) ? JSON.stringify(v) : prettyScalar(v)
+                return (
+                  <td key={c} style={{ padding: '10px 12px', borderBottom: '1px solid var(--border)', verticalAlign: 'top' }}>{cell}</td>
+                )
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {rows.length > displayRows.length ? (
+        <div className="muted" style={{ padding: '10px 12px' }}>Showing first {displayRows.length} of {rows.length}</div>
+      ) : null}
+    </div>
+  )
+}
+
+function ResultView({ value }) {
+  if (value === null || value === undefined) return null
+  if (Array.isArray(value)) return <DataTable rows={value} />
+  if (isPlainObject(value)) return <KeyValueGrid obj={value} />
+  return <div style={{ wordBreak: 'break-word' }}>{prettyScalar(value)}</div>
 }
 
 export default function ReportsPage() {
@@ -72,7 +157,7 @@ export default function ReportsPage() {
 
       <div className="card" style={{ marginTop: 12 }}>
         <h3 style={{ marginTop: 0 }}>{title || 'Result'}</h3>
-        {data === null ? <div className="muted">Pick a report</div> : <JsonBlock value={data} />}
+        {data === null ? <div className="muted">Pick a report</div> : <ResultView value={data} />}
       </div>
     </div>
   )

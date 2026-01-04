@@ -83,7 +83,7 @@ public class CSVService {
             mailMessage.setSubject("Action required : New cases assigned");
             mailMessage.setText("""
                     Hello,
-                    You have been assigned new debt recovery cases within the PHEONIX system.
+                    You have been assigned new debt recovery cases within the NEXUS system.
                     Please log in to your dashboard to review the case details, check the customer profiles, and begin the outreach process.
                     All updates and call logs must be recorded directly in the portal for compliance.
                     Regards,

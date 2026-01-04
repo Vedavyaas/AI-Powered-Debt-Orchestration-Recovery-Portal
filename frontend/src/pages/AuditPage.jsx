@@ -19,6 +19,31 @@ function toIsoDateTime(value) {
   return v.length === 16 ? `${v}:00` : v
 }
 
+function CountTable({ title, counts }) {
+  const entries = counts && typeof counts === 'object' ? Object.entries(counts) : []
+  if (!entries.length) return null
+
+  entries.sort((a, b) => Number(b[1] || 0) - Number(a[1] || 0))
+
+  return (
+    <div style={{ marginTop: 12 }}>
+      <div className="muted" style={{ marginBottom: 8 }}>{title}</div>
+      <div style={{ border: '1px solid var(--border)', borderRadius: 14, overflow: 'hidden' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 120px', gap: 0, background: 'var(--panel-solid)' }}>
+          <div className="muted" style={{ padding: '10px 12px', borderBottom: '1px solid var(--border)' }}>Name</div>
+          <div className="muted" style={{ padding: '10px 12px', borderBottom: '1px solid var(--border)', textAlign: 'right' }}>Count</div>
+          {entries.map(([key, val]) => (
+            <React.Fragment key={key}>
+              <div style={{ padding: '10px 12px', borderBottom: '1px solid var(--border)' }}>{key}</div>
+              <div style={{ padding: '10px 12px', borderBottom: '1px solid var(--border)', textAlign: 'right' }}>{val ?? 0}</div>
+            </React.Fragment>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function AuditTable({ items }) {
   if (!items || items.length === 0) return <div className="muted">No results</div>
 
@@ -231,10 +256,8 @@ export default function AuditPage() {
 
           {stats ? (
             <div style={{ marginTop: 12 }}>
-              <div className="muted" style={{ marginBottom: 6 }}>Action counts</div>
-              <pre style={{ margin: 0, overflowX: 'auto' }}>{JSON.stringify(actionCounts, null, 2)}</pre>
-              <div className="muted" style={{ marginTop: 12, marginBottom: 6 }}>Entity types</div>
-              <pre style={{ margin: 0, overflowX: 'auto' }}>{JSON.stringify(entityTypeCounts, null, 2)}</pre>
+              <CountTable title="Action counts" counts={actionCounts} />
+              <CountTable title="Entity types" counts={entityTypeCounts} />
             </div>
           ) : null}
         </div>

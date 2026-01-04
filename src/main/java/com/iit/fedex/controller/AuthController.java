@@ -8,6 +8,7 @@ import com.iit.fedex.repository.JWTLoginEntity;
 import com.iit.fedex.repository.JWTLoginRepository;
 import com.iit.fedex.service.LoginService;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -15,6 +16,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.HashMap;
@@ -41,9 +43,22 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
-        AuthResponse response = loginService.login(request);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+        try {
+            AuthResponse response = loginService.login(request);
+            return ResponseEntity.ok(response);
+        } catch (ResponseStatusException ex) {
+            Map<String, Object> body = new HashMap<>();
+            String message = ex.getReason() != null && !ex.getReason().isBlank() ? ex.getReason() : "Login failed";
+            body.put("error", message);
+            body.put("status", ex.getStatusCode().value());
+            return ResponseEntity.status(ex.getStatusCode()).body(body);
+        } catch (Exception ex) {
+            Map<String, Object> body = new HashMap<>();
+            body.put("error", "Login failed");
+            body.put("status", HttpStatus.UNAUTHORIZED.value());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(body);
+        }
     }
 
     @PostMapping("/logout")
@@ -197,7 +212,7 @@ public class AuthController {
     public ResponseEntity<Map<String, String>> healthCheck() {
         Map<String, String> health = new HashMap<>();
         health.put("status", "UP");
-        health.put("service", "PHEONIX Auth Service");
+        health.put("service", "NEXUS Auth Service");
         return ResponseEntity.ok(health);
     }
 
