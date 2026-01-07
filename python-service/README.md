@@ -96,6 +96,8 @@ gunicorn --bind 0.0.0.0:8000 --workers 2 app:app
 
 The service will create a default model on first run if no trained model exists.
 
+The provided Dockerfile uses a multi-stage build (build wheels in a builder stage, then install into a slim runtime stage) to keep the runtime image smaller and speed up rebuilds.
+
 ```bash
 docker build -t python-ai-service .
 docker run -p 8000:8000 python-ai-service

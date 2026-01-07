@@ -52,6 +52,8 @@ If the AI service is unavailable, the system remains usable; scoring is skipped 
 
 In Docker, the frontend is built and packaged into the backend image and served as static assets by Spring Boot. The Python AI service runs as a separate container.
 
+The Python AI service image uses a multi-stage build (wheels built in a builder stage, installed into a slim runtime stage) for faster rebuilds and a smaller runtime image.
+
 ## Roles (demo accounts)
 
 Sample data is automatically initialized on backend startup (safe to restart).
@@ -75,11 +77,10 @@ Sample invoice numbers: `INV-10001` … `INV-10005`
 
 ### Email Configuration (Required)
 
-The application requires email credentials for sending assignment notifications. You have two options:
+The application requires email credentials for sending assignment notifications.
+If these are not set, the app will still run, but email notifications will fail.
 
-#### Option 1: Environment Variables (Recommended)
-
-Create a `.env` file in the project root (see `.env.example` for template):
+#### Option 1: Export environment variables (Recommended)
 
 ```bash
 SPRING_MAIL_HOST=smtp.gmail.com
@@ -94,7 +95,24 @@ SPRING_MAIL_PASSWORD=your-app-password
 3. Generate an App Password for "Mail"
 4. Use the 16-character password (no spaces) as `SPRING_MAIL_PASSWORD`
 
-#### Option 2: Docker Compose Environment
+#### Option 2: Use a local `.env` file with Docker Compose
+
+Create a `.env` file in the project root:
+
+```bash
+SPRING_MAIL_HOST=smtp.gmail.com
+SPRING_MAIL_PORT=587
+SPRING_MAIL_USERNAME=your-email@gmail.com
+SPRING_MAIL_PASSWORD=your-app-password
+```
+
+Then start with:
+
+```bash
+docker compose --env-file .env up --build
+```
+
+#### Option 3: Docker Compose inline environment
 
 Add to `docker-compose.yml` under the `app` service:
 
@@ -134,6 +152,12 @@ This starts MySQL, Python AI service, and the Spring Boot app (serving the built
 2. **Start all services**:
 ```bash
 docker compose up --build
+```
+
+If you created a local `.env` file:
+
+```bash
+docker compose --env-file .env up --build
 ```
 
 3. **Access the application**:
@@ -276,15 +300,3 @@ See [python-service/README.md](python-service/README.md) for detailed API docume
 - Stronger governance controls (approval chains, immutable case history)
 - Production security hardening (secrets management, key rotation, PII redaction)
 - Real-time model retraining with production data
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
-
-## License
-
-[Add your license here]
