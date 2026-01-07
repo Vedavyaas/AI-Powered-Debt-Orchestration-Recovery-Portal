@@ -47,8 +47,6 @@ services:
       python-ai:
         condition: service_healthy
     restart: unless-stopped
-    env_file:
-      - .env
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/nexus_db?allowPublicKeyRetrieval=true&useSSL=false
       SPRING_DATASOURCE_USERNAME: root

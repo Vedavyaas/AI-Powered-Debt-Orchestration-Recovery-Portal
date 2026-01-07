@@ -1,31 +1,45 @@
-FROM python:3.11-slim
+FROM python:3.11-slim AS builder
 
 WORKDIR /app
 
-# Install system dependencies
+# Build dependencies only (kept out of final runtime image)
 RUN apt-get update && apt-get install -y \
     gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt .
+
+# Build wheels once (cached), then reuse them in runtime stage
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip wheel --wheel-dir /wheels -r requirements.txt
+
+
+FROM python:3.11-slim AS runtime
+
+WORKDIR /app
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+# Runtime dependencies (curl is used by docker-compose healthcheck)
+RUN apt-get update && apt-get install -y \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements and install Python dependencies
+COPY --from=builder /wheels /wheels
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application code
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install --no-index --find-links=/wheels -r requirements.txt \
+    && rm -rf /wheels
+
 COPY app.py .
 COPY train_model.py .
 
-# Create models directory
+# Always create the models directory; trained model files are intentionally not baked in
 RUN mkdir -p models
 
-# Copy models directory (will be empty if models don't exist, that's OK)
-# The service will create a default model on startup if no trained model exists
-COPY models/ ./models/
-
-# Expose port
 EXPOSE 8000
 
-# Use gunicorn for production
 CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "2", "--timeout", "120", "app:app"]
 
