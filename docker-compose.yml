@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   db:
     image: mysql:8.0
@@ -19,6 +17,22 @@ services:
       retries: 5
       start_period: 30s
 
+  # Python AI Service
+  python-ai:
+    build:
+      context: ./python-service
+      dockerfile: Dockerfile
+    container_name: nexus-python-ai
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
   # Spring Boot App Service
   app:
     build:
@@ -30,11 +44,20 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      python-ai:
+        condition: service_healthy
     restart: unless-stopped
+    env_file:
+      - .env
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/nexus_db?allowPublicKeyRetrieval=true&useSSL=false
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: password
+      PYTHON_AI_URL: http://python-ai:8000
+      SPRING_MAIL_HOST: ${SPRING_MAIL_HOST:-smtp.gmail.com}
+      SPRING_MAIL_PORT: ${SPRING_MAIL_PORT:-587}
+      SPRING_MAIL_USERNAME: ${SPRING_MAIL_USERNAME:-}
+      SPRING_MAIL_PASSWORD: ${SPRING_MAIL_PASSWORD:-}
 
   # React Frontend Service
   # Note: frontend is built into the Spring Boot image via the root Dockerfile

@@ -7,6 +7,7 @@ import com.iit.fedex.repository.DebtCaseRepository;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -18,7 +19,18 @@ import java.util.*;
 public class AIResponseIntegration {
 
     private static final Logger logger = LoggerFactory.getLogger(AIResponseIntegration.class);
-    private final String pythonUrl = "http://localhost:8000/predict";
+    
+    @Value("${python.ai.url:http://localhost:8000}")
+    private String pythonBaseUrl;
+    
+    private String getPythonUrl() {
+        return pythonBaseUrl + "/predict";
+    }
+    
+    private String getHealthUrl() {
+        return pythonBaseUrl + "/health";
+    }
+    
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final DebtCaseRepository debtCaseRepository;
@@ -60,7 +72,7 @@ public class AIResponseIntegration {
             }
 
             ResponseEntity<Map> responseEntity = restTemplate.postForEntity(
-                    pythonUrl, caseData, Map.class);
+                    getPythonUrl(), caseData, Map.class);
 
             if (responseEntity.getBody() != null) {
                 Map<String, Object> response = responseEntity.getBody();
@@ -101,7 +113,7 @@ public class AIResponseIntegration {
             caseData.put("pastDefaults", caseEntity.getPastDefaults());
 
             ResponseEntity<Map> responseEntity = restTemplate.postForEntity(
-                    pythonUrl, List.of(caseData), Map.class);
+                    getPythonUrl(), List.of(caseData), Map.class);
 
             if (responseEntity.getBody() != null) {
                 List<Map<String, Object>> predictions = (List<Map<String, Object>>) responseEntity.getBody().get("predictions");
@@ -120,7 +132,7 @@ public class AIResponseIntegration {
      */
     public boolean isAIServiceAvailable() {
         try {
-            return restTemplate.getForEntity(pythonUrl.replace("/predict", "/health"), String.class)
+            return restTemplate.getForEntity(getHealthUrl(), String.class)
                     .getStatusCode()
                     .is2xxSuccessful();
         } catch (Exception e) {

@@ -105,11 +105,11 @@ public class SampleDataInitializer implements CommandLineRunner {
 
     private void seedDebtCasesAndInvestigations() {
         // Debt cases (invoiceNumber is used as the natural key across the app)
-        ensureDebtCase("INV-10001", "Acme Imports", 1250.75, 12, Service.EXPRESS, 0, Status.UN_ASSIGNED, null, 0.22);
-        ensureDebtCase("INV-10002", "Blue Ocean Retail", 9800.00, 65, Service.GROUND, 2, Status.ASSIGNED, AGENCY_ALPHA, 0.81);
-        ensureDebtCase("INV-10003", "Cedar Logistics", 420.10, 5, Service.FREIGHT, 0, Status.UN_ASSIGNED, null, 0.15);
-        ensureDebtCase("INV-10004", "Delta Supplies", 15200.00, 92, Service.EXPRESS, 3, Status.ASSIGNED_AND_WAITING, AGENCY_BETA, 0.90);
-        ensureDebtCase("INV-10005", "Evergreen Traders", 3100.50, 31, Service.GROUND, 1, Status.ASSIGNED, AGENCY_ALPHA, 0.67);
+        ensureDebtCase("INV-10001", "Acme Imports", 1250.75, 12, Service.EXPRESS, 0, Status.UN_ASSIGNED, null, -1);
+        ensureDebtCase("INV-10002", "Blue Ocean Retail", 9800.00, 65, Service.GROUND, 2, Status.ASSIGNED, AGENCY_ALPHA, -1);
+        ensureDebtCase("INV-10003", "Cedar Logistics", 420.10, 5, Service.FREIGHT, 0, Status.UN_ASSIGNED, null, -1);
+        ensureDebtCase("INV-10004", "Delta Supplies", 15200.00, 92, Service.EXPRESS, 3, Status.ASSIGNED_AND_WAITING, AGENCY_BETA, -1);
+        ensureDebtCase("INV-10005", "Evergreen Traders", 3100.50, 31, Service.GROUND, 1, Status.ASSIGNED, AGENCY_ALPHA, -1);
 
         // Investigations (one per case max in current repository API)
         ensureDebtInvest("INV-10002", AGENT1_EMAIL, Stage.IN_PROGRESS, "Reached customer; awaiting updated payment plan.");

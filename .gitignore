@@ -31,3 +31,20 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Python Service ###
+python-service/models/
+python-service/__pycache__/
+python-service/*.pyc
+python-service/venv/
+python-service/.env
+python-service/.env.local
+
+### Environment Variables ###
+.env
+.env.local
+.env.*.local
+
+### Logs ###
+*.log
+logs/
