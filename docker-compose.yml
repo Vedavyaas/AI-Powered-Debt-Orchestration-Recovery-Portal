@@ -54,10 +54,6 @@ services:
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: password
       PYTHON_AI_URL: http://python-ai:8000
-      SPRING_MAIL_HOST: ${SPRING_MAIL_HOST:-smtp.gmail.com}
-      SPRING_MAIL_PORT: ${SPRING_MAIL_PORT:-587}
-      SPRING_MAIL_USERNAME: ${SPRING_MAIL_USERNAME:-}
-      SPRING_MAIL_PASSWORD: ${SPRING_MAIL_PASSWORD:-}
 
   # React Frontend Service
   # Note: frontend is built into the Spring Boot image via the root Dockerfile

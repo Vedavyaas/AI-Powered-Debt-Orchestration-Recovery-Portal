@@ -88,11 +88,11 @@ export const debtApi = {
 
 // Forgot Password API
 export const forgotPasswordApi = {
-  forgotPassword: (email: string) =>
-    api.post<{ message: string }>('/api/auth/forgot-password', { email }),
+  forgotPassword: (_email: string) =>
+    Promise.reject(new Error('Forgot password is disabled (email/OTP disabled)')),
 
-  resetPassword: (email: string, otp: string, newPassword: string) =>
-    api.post<{ message: string }>('/api/auth/reset-password', { email, otp, newPassword }),
+  resetPassword: (_email: string, _otp: string, _newPassword: string) =>
+    Promise.reject(new Error('Password reset is disabled (email/OTP disabled)')),
 
   resetPasswordConfirm: (token: string, newPassword: string) =>
     api.post<{ message: string }>('/api/auth/reset-password-confirm', { token, newPassword }),
@@ -371,8 +371,8 @@ export const jwtLoginApi = {
 
 // Create Account API
 export const createAccountApi = {
-  getOTP: (email: string) =>
-    api.get<{ otp: string }>(`/get/OTP?email=${email}`),
+  getOTP: (_email: string) =>
+    Promise.reject(new Error('Signup OTP is disabled (email/OTP disabled)')),
 
   createAccount: (account: { email: string; password: string; agencyId: string; role: string }) =>
     api.post<{ message: string }>('/create', account)

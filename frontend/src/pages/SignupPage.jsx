@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { api } from '../api.js'
 import EvaluatorNotes from '../components/EvaluatorNotes.jsx'
@@ -23,44 +23,9 @@ export default function SignupPage() {
   const [password, setPassword] = useState('')
   const [role, setRole] = useState('DCA_AGENT')
   const [agencyId, setAgencyId] = useState('')
-
-  const [key, setKey] = useState('')
-
-  const [loadingKey, setLoadingKey] = useState(false)
   const [loadingCreate, setLoadingCreate] = useState(false)
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
-
-  const canRequestKey = useMemo(() => email.trim().length > 3, [email])
-
-  const onRequestKey = async () => {
-    setError('')
-    setMessage('')
-    if (!canRequestKey) {
-      setError('Enter a valid email')
-      return
-    }
-
-    setLoadingKey(true)
-    try {
-      const res = await api.signupGetKey(email.trim())
-      const text = typeof res === 'string' ? res.trim() : ''
-      const maybeMessage = res && typeof res === 'object' ? String(res.message || '').trim() : ''
-
-      // Backward compatible: if backend still returns raw string, never display OTP/UUID.
-      if (maybeMessage) {
-        setMessage(maybeMessage)
-      } else if (text && !isLikelySignupKey(text)) {
-        setMessage(text)
-      } else {
-        setMessage('Code sent. Check your email.')
-      }
-    } catch (e) {
-      setError(e?.message || 'Failed to generate signup key')
-    } finally {
-      setLoadingKey(false)
-    }
-  }
 
   const onCreate = async (e) => {
     e.preventDefault()
@@ -68,11 +33,9 @@ export default function SignupPage() {
     setMessage('')
 
     const trimmedEmail = email.trim()
-    const trimmedKey = key.trim()
 
     if (!trimmedEmail) return setError('Email is required')
     if (!password) return setError('Password is required')
-    if (!trimmedKey) return setError('Signup key is required')
 
     setLoadingCreate(true)
     try {
@@ -83,7 +46,7 @@ export default function SignupPage() {
         agencyId: agencyId.trim() || null
       }
 
-      const res = await api.signupCreateAccount(body, trimmedKey)
+      const res = await api.signupCreateAccount(body)
       setMessage(typeof res === 'string' ? res : 'Account created')
       navigate('/login', { replace: true })
     } catch (e) {
@@ -101,50 +64,37 @@ export default function SignupPage() {
           <Link className="muted" to="/login">Back to sign in</Link>
         </div>
 
-        <div className="grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
-          <div className="card" style={{ padding: 14, borderStyle: 'dashed' }}>
-            <h3 style={{ marginTop: 0 }}>1) Send code</h3>
+        <div className="card" style={{ padding: 14, borderStyle: 'dashed' }}>
+          <h3 style={{ marginTop: 0 }}>Create</h3>
+          <form onSubmit={onCreate}>
             <label className="label">Email</label>
             <input className="input" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@company.com" />
+
             <div style={{ marginTop: 12 }}>
-              <button className="button" type="button" onClick={onRequestKey} disabled={loadingKey || !canRequestKey}>
-                {loadingKey ? 'Sending…' : 'Send code'}
+              <label className="label">Role</label>
+              <select className="input" value={role} onChange={(e) => setRole(e.target.value)}>
+                {ROLES.map((r) => (
+                  <option key={r} value={r}>{r}</option>
+                ))}
+              </select>
+            </div>
+
+            <div style={{ marginTop: 12 }}>
+              <label className="label">Password</label>
+              <input className="input" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="New password" />
+            </div>
+
+            <div style={{ marginTop: 12 }}>
+              <label className="label">Agency ID (optional)</label>
+              <input className="input" value={agencyId} onChange={(e) => setAgencyId(e.target.value)} placeholder="Agency identifier" />
+            </div>
+
+            <div style={{ marginTop: 12 }}>
+              <button className="button" type="submit" disabled={loadingCreate}>
+                {loadingCreate ? 'Creating…' : 'Create account'}
               </button>
             </div>
-          </div>
-
-          <div className="card" style={{ padding: 14, borderStyle: 'dashed' }}>
-            <h3 style={{ marginTop: 0 }}>2) Create</h3>
-            <form onSubmit={onCreate}>
-              <label className="label">Code</label>
-              <input className="input" value={key} onChange={(e) => setKey(e.target.value)} placeholder="Paste the code" />
-
-              <div style={{ marginTop: 12 }}>
-                <label className="label">Role</label>
-                <select className="input" value={role} onChange={(e) => setRole(e.target.value)}>
-                  {ROLES.map((r) => (
-                    <option key={r} value={r}>{r}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div style={{ marginTop: 12 }}>
-                <label className="label">Password</label>
-                <input className="input" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="New password" />
-              </div>
-
-              <div style={{ marginTop: 12 }}>
-                <label className="label">Agency ID (optional)</label>
-                <input className="input" value={agencyId} onChange={(e) => setAgencyId(e.target.value)} placeholder="Agency identifier" />
-              </div>
-
-              <div style={{ marginTop: 12 }}>
-                <button className="button" type="submit" disabled={loadingCreate}>
-                  {loadingCreate ? 'Creating…' : 'Create account'}
-                </button>
-              </div>
-            </form>
-          </div>
+          </form>
         </div>
 
         {error ? <div className="error" style={{ marginTop: 12 }}>{error}</div> : null}

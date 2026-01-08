@@ -12,7 +12,7 @@ import com.iit.fedex.repository.JWTLoginEntity;
 import com.iit.fedex.repository.JWTLoginRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,9 +25,9 @@ public class CSVService {
 
     private final JWTLoginRepository jwtLoginRepository;
     private final DebtCaseRepository debtCaseRepository;
-    private final JavaMailSenderImpl mailSender;
+    private final JavaMailSender mailSender;
 
-    public CSVService(JWTLoginRepository jwtLoginRepository, DebtCaseRepository debtCaseRepository, JavaMailSenderImpl mailSender) {
+    public CSVService(JWTLoginRepository jwtLoginRepository, DebtCaseRepository debtCaseRepository, JavaMailSender mailSender) {
         this.jwtLoginRepository = jwtLoginRepository;
         this.debtCaseRepository = debtCaseRepository;
         this.mailSender = mailSender;

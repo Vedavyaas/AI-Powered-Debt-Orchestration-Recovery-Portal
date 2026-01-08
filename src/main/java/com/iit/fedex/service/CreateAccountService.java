@@ -2,7 +2,6 @@ package com.iit.fedex.service;
 
 import com.iit.fedex.repository.JWTLoginEntity;
 import com.iit.fedex.repository.JWTLoginRepository;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -34,30 +33,9 @@ public class CreateAccountService {
             return "Invalid email";
         }
 
-        if (jwtLoginRepository.existsByEmailIgnoreCase(normalizedEmail)) {
-            return "Email already exists";
-        }
-
-        map.put(normalizedEmail, Key());
-
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(email);
-        message.setSubject("NEXUS Platform | Secure Access Invitation - FedEx DCA Management");
-        message.setText("Dear User,\n\n" +
-            "You have been invited to join the NEXUS AI-Powered Debt Recovery Ecosystem. " +
-                "Our platform leverages advanced Spring Boot security and Python ML to streamline " +
-                "agency collaboration and recovery efficiency.\n\n" +
-                "Your secure access key is: " + map.get(normalizedEmail) + "\n\n" +
-            "Please use this key to complete your account registration on the NEXUS portal. " +
-                "This key is unique to your email and ensures 100% auditable access for compliance.\n\n" +
-                "Best Regards,\n" +
-            "NEXUS System Administrator\n" +
-                "FedEx Global Recovery Team");
-        message.setFrom("testingxyz123456@gmail.com");
-
-        javaMailSender.send(message);
-
-        return "Code sent. Check your email.";
+        // Email/OTP is disabled (SMTP config commented out).
+        // Keep behavior explicit so UI/devs understand why this doesn't send.
+        return "Email/OTP is disabled on this environment";
     }
 
     public String createAccount(JWTLoginEntity jwtLoginEntity, String key) {
@@ -70,9 +48,14 @@ public class CreateAccountService {
             return "Email already exists";
         }
 
-        if(key != null && key.equals(map.get(normalizedEmail))) {
+        // Development mode: allow account creation without OTP/key.
+        // If a key is provided and matches, we still accept it.
+        boolean keyVerified = key != null && !key.isBlank() && key.equals(map.get(normalizedEmail));
+        boolean skipKeyVerification = key == null || key.isBlank();
+
+        if (skipKeyVerification || keyVerified) {
             com.iit.fedex.assets.Role role = jwtLoginEntity.getRole();
-            if(role == null) {
+            if (role == null) {
                 role = com.iit.fedex.assets.Role.DCA_AGENT;
             } else {
                 try {

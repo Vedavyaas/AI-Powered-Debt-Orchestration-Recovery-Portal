@@ -24,7 +24,7 @@ public class CreateAccountController {
         this.createAccountService=createAccountService;
     }
 
-    @GetMapping("/get/OTP")
+    @GetMapping({"/get/OTP", "/get/otp"})
     public ResponseEntity<Map<String, String>> getOTP(@RequestParam String email) {
         Map<String, String> response = new HashMap<>();
         String result = createAccountService.generateKey(email);
@@ -43,7 +43,7 @@ public class CreateAccountController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<Map<String, String>> createAccount(@RequestBody JWTLoginEntity jwtLoginEntity, @RequestParam String key) {
+    public ResponseEntity<Map<String, String>> createAccount(@RequestBody JWTLoginEntity jwtLoginEntity, @RequestParam(required = false) String key) {
         Map<String, String> response = new HashMap<>();
         String result = createAccountService.createAccount(jwtLoginEntity, key);
 

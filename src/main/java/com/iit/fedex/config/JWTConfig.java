@@ -6,6 +6,7 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -21,6 +22,7 @@ import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.http.HttpMethod;
 
 import java.security.KeyPair;
@@ -34,7 +36,39 @@ import java.util.UUID;
 @EnableWebSecurity
 public class JWTConfig {
 
+    private static RequestMatcher otpRequestMatcher() {
+        return request -> {
+            String path = request.getRequestURI();
+            String contextPath = request.getContextPath();
+            if (contextPath != null && !contextPath.isEmpty() && path != null && path.startsWith(contextPath)) {
+                path = path.substring(contextPath.length());
+            }
+
+            if (path == null) {
+                return false;
+            }
+
+            return path.equals("/get/OTP")
+                || path.equals("/get/otp")
+                || path.startsWith("/get/OTP/")
+                || path.startsWith("/get/otp/");
+        };
+    }
+
     @Bean
+    @Order(0)
+    public SecurityFilterChain otpSecurityFilterChain(HttpSecurity http) throws Exception {
+        http
+            .securityMatcher(otpRequestMatcher())
+            .authorizeHttpRequests(authorizeRequests -> authorizeRequests.anyRequest().permitAll())
+            .oauth2ResourceServer(oauth2 -> oauth2.disable())
+            .csrf(AbstractHttpConfigurer::disable);
+
+        return http.build();
+    }
+
+    @Bean
+    @Order(1)
     public SecurityFilterChain securityFilterChain(HttpSecurity http) {
         http
         .authorizeHttpRequests(authorizeRequests -> authorizeRequests
@@ -49,10 +83,13 @@ public class JWTConfig {
                 "/h2-console/**",
                 "/login/**",
                 "/create/**",
+                "/create",
+                "/get/OTP",
                 "/get/OTP/**",
+                "/get/otp",
+                "/get/otp/**",
                 "/forgot-password/**",
                 "/reset-password/**",
-                // SPA client-side routes (allow browser direct navigation to these)
                 "/home/**",
                 "/signup/**",
                 "/users/**",

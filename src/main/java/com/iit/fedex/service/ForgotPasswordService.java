@@ -2,7 +2,6 @@ package com.iit.fedex.service;
 
 import com.iit.fedex.repository.JWTLoginEntity;
 import com.iit.fedex.repository.JWTLoginRepository;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -31,29 +30,9 @@ public class ForgotPasswordService {
     }
 
     public String sendResetToken(String email) {
-        Optional<JWTLoginEntity> userOpt = jwtLoginRepository.findByEmail(email);
-        if (userOpt.isEmpty()) {
-            return "Email not found";
-        }
+        // Email is disabled (SMTP config commented out). Keep endpoint behavior explicit.
+        return "Password reset via email is disabled on this environment";
 
-        String token = generateToken();
-        resetTokens.put(email, token);
-
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(email);
-        message.setSubject("NEXUS Platform | Password Reset Request");
-        message.setText("Dear User,\n\n" +
-            "You have requested a password reset for your NEXUS account.\n\n" +
-                "Your reset code is: " + token + "\n\n" +
-                "Please use this code to reset your password within the next hour.\n\n" +
-                "Best Regards,\n" +
-            "NEXUS System Administrator\n" +
-                "FedEx Global Recovery Team");
-        message.setFrom("testingxyz123456@gmail.com");
-
-        javaMailSender.send(message);
-
-        return "Reset code sent to your email";
     }
 
     public String resetPassword(String email, String token, String newPassword) {

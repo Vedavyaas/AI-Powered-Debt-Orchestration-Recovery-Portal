@@ -70,14 +70,13 @@ export const api = {
   logout: () => request('/api/auth/logout', { method: 'POST' }),
   me: () => request('/api/auth/me'),
 
-  forgotPassword: (email) => request(`/api/auth/forgot-password?email=${encodeURIComponent(email)}`, { method: 'POST' }),
-  resetPassword: (email, token, newPassword) => request('/api/auth/reset-password', {
-    method: 'POST',
-    body: JSON.stringify({ email, token, newPassword })
-  }),
+  // Email/OTP disabled
+  forgotPassword: (_email) => Promise.reject(new Error('Forgot password is disabled (email/OTP disabled)')),
+  resetPassword: (_email, _token, _newPassword) => Promise.reject(new Error('Password reset is disabled (email/OTP disabled)')),
 
-  signupGetKey: (email) => request(`/get/OTP?email=${encodeURIComponent(email)}`),
-  signupCreateAccount: (user, key) => request(`/create?key=${encodeURIComponent(key)}`, {
+  // Email/OTP disabled
+  signupGetKey: (_email) => Promise.reject(new Error('Signup code is disabled (email/OTP disabled)')),
+  signupCreateAccount: (user) => request('/create', {
     method: 'POST',
     body: JSON.stringify(user)
   }),

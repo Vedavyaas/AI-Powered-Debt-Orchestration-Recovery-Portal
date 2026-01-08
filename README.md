@@ -1,5 +1,3 @@
-Deployed URL: 
-
 **Tech Stack (Full-Stack + AI): Java 17 • Spring Boot • Spring Security (JWT RBAC) • Spring Data JPA/Hibernate • MySQL 8 • React (Vite) • Docker/Docker Compose • Python (TensorFlow) for AI/ML scoring**
 
 # FedEx Phoenix | DCA Management (Digital + AI)
@@ -71,58 +69,10 @@ Sample invoice numbers: `INV-10001` … `INV-10005`
 
 - Docker and Docker Compose installed
 - For local development: Java 17, Maven, Node.js 18+, Python 3.11+
-- Gmail account with App Password (for email notifications)
 
-## Configuration
+## Development note (mail)
 
-### Email Configuration (Required)
-
-The application requires email credentials for sending assignment notifications.
-If these are not set, the app will still run, but email notifications will fail.
-
-#### Option 1: Export environment variables (Recommended)
-
-```bash
-SPRING_MAIL_HOST=smtp.gmail.com
-SPRING_MAIL_PORT=587
-SPRING_MAIL_USERNAME=your-email@gmail.com
-SPRING_MAIL_PASSWORD=your-app-password
-```
-
-**For Gmail users**: You need to generate an [App Password](https://support.google.com/accounts/answer/185833):
-1. Go to your Google Account settings
-2. Enable 2-Step Verification
-3. Generate an App Password for "Mail"
-4. Use the 16-character password (no spaces) as `SPRING_MAIL_PASSWORD`
-
-#### Option 2: Use a local `.env` file with Docker Compose
-
-Create a `.env` file in the project root:
-
-```bash
-SPRING_MAIL_HOST=smtp.gmail.com
-SPRING_MAIL_PORT=587
-SPRING_MAIL_USERNAME=your-email@gmail.com
-SPRING_MAIL_PASSWORD=your-app-password
-```
-
-Then start with:
-
-```bash
-docker compose --env-file .env up --build
-```
-
-#### Option 3: Docker Compose inline environment
-
-Add to `docker-compose.yml` under the `app` service:
-
-```yaml
-environment:
-  SPRING_MAIL_USERNAME: your-email@gmail.com
-  SPRING_MAIL_PASSWORD: your-app-password
-```
-
-**⚠️ Important**: Never commit email credentials to version control. Use environment variables or secrets management.
+For **testing/development purposes**, the **mail service is suspended/disabled** in this repo.
 
 ### Database Configuration
 
@@ -147,20 +97,14 @@ The Python AI service URL is automatically configured in Docker. For local devel
 
 This starts MySQL, Python AI service, and the Spring Boot app (serving the built frontend).
 
-1. **Configure email credentials** (see Configuration section above)
+0. **Install Docker and run Docker Desktop** (ensure Docker is running)
 
-2. **Start all services**:
+1. **Start all services**:
 ```bash
 docker compose up --build
 ```
 
-If you created a local `.env` file:
-
-```bash
-docker compose --env-file .env up --build
-```
-
-3. **Access the application**:
+2. **Access the application**:
    - Open `http://localhost:8080` in your browser
    - Login with demo credentials (see Roles section)
 
@@ -195,13 +139,6 @@ python app.py
 ```
 
 #### 3. Start Backend
-
-Set environment variables:
-```bash
-export SPRING_MAIL_USERNAME=your-email@gmail.com
-export SPRING_MAIL_PASSWORD=your-app-password
-```
-
 Run:
 ```bash
 ./mvnw spring-boot:run
@@ -277,9 +214,7 @@ See [python-service/README.md](python-service/README.md) for detailed API docume
 
 ### Email not sending
 
-- Verify `SPRING_MAIL_USERNAME` and `SPRING_MAIL_PASSWORD` are set correctly
-- For Gmail, ensure you're using an App Password (not your regular password)
-- Check application logs for SMTP errors
+- In this repo’s current dev/testing setup, **mail is intentionally disabled**.
 
 ### Python AI service not responding
 

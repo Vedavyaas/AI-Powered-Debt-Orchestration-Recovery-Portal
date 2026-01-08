@@ -4,7 +4,7 @@ import com.iit.fedex.assets.Role;
 import com.iit.fedex.dto.ManagerAssignment;
 import com.iit.fedex.repository.*;
 import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,9 +17,9 @@ public class DCAManagerService {
     private final DebtCaseRepository debtCaseRepository;
 
     private final DebtInvestRepository debtInvestRepository;
-    private final JavaMailSenderImpl mailSender;
+    private final JavaMailSender mailSender;
 
-    public DCAManagerService(JWTLoginRepository jwtLoginRepository, DebtCaseRepository debtCaseRepository, DebtInvestRepository debtInvestRepository, JavaMailSenderImpl mailSender) {
+    public DCAManagerService(JWTLoginRepository jwtLoginRepository, DebtCaseRepository debtCaseRepository, DebtInvestRepository debtInvestRepository, JavaMailSender mailSender) {
         this.jwtLoginRepository = jwtLoginRepository;
         this.debtCaseRepository = debtCaseRepository;
         this.debtInvestRepository = debtInvestRepository;
