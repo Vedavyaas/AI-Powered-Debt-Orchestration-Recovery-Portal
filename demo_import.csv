@@ -1,0 +1,11 @@
+invoiceNumber,customerName,amount,daysOverdue,serviceType,pastDefaults
+INV-2025-001,Stark Industries,54000.00,15,EXPRESS,0
+INV-2025-002,Wayne Enterprises,1250.50,45,GROUND,1
+INV-2025-003,Cyberdyne Systems,9800.75,120,FREIGHT,5
+INV-2025-004,Umbrella Corp,350.00,200,GROUND,8
+INV-2025-005,Massive Dynamic,7600.25,60,EXPRESS,2
+INV-2025-006,Aperture Science,4200.00,30,FREIGHT,0
+INV-2025-007,Black Mesa,150.00,90,GROUND,3
+INV-2025-008,Tyrell Corp,11200.50,150,EXPRESS,4
+INV-2025-009,Oscorp,850.00,45,GROUND,1
+INV-2025-010,Globex Corp,25000.00,10,FREIGHT,0

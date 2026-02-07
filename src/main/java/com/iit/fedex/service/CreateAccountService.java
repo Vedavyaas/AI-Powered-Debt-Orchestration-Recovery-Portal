@@ -33,9 +33,25 @@ public class CreateAccountService {
             return "Invalid email";
         }
 
-        // Email/OTP is disabled (SMTP config commented out).
-        // Keep behavior explicit so UI/devs understand why this doesn't send.
-        return "Email/OTP is disabled on this environment";
+        if (jwtLoginRepository.existsByEmailIgnoreCase(normalizedEmail)) {
+             return "Email already exists";
+        }
+
+        String key = Key();
+        map.put(normalizedEmail, key);
+
+        org.springframework.mail.SimpleMailMessage message = new org.springframework.mail.SimpleMailMessage();
+        message.setTo(normalizedEmail);
+        message.setSubject("Account Verification");
+        message.setText("Your verification key is: " + key);
+
+        try {
+            javaMailSender.send(message);
+            return "Verification key sent to email";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Failed to send email";
+        }
     }
 
     public String createAccount(JWTLoginEntity jwtLoginEntity, String key) {

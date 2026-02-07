@@ -27,7 +27,11 @@ public class DebtCaseEntity{
     @JsonIgnore
     private Double propensityScore;
 
-    public DebtCaseEntity() {}
+    public DebtCaseEntity() {
+        this.status = Status.UN_ASSIGNED;
+        this.assignedTo = null;
+        this.propensityScore = -1.00;
+    }
 
     public DebtCaseEntity(String invoiceNumber, String customerName, Double amount, Integer daysOverdue,  Service serviceType, Integer pastDefaults) {
         this.invoiceNumber = invoiceNumber;

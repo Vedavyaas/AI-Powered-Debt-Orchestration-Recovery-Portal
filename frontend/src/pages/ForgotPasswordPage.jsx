@@ -19,9 +19,6 @@ export default function ForgotPasswordPage() {
     setError('')
     setMessage('')
 
-    setError('Forgot password is disabled (email/OTP disabled)')
-    return
-
     const trimmedEmail = email.trim()
     if (!trimmedEmail) return setError('Email is required')
 
@@ -40,9 +37,6 @@ export default function ForgotPasswordPage() {
     e.preventDefault()
     setError('')
     setMessage('')
-
-    setError('Password reset is disabled (email/OTP disabled)')
-    return
 
     const trimmedEmail = email.trim()
     if (!trimmedEmail) return setError('Email is required')

@@ -37,19 +37,7 @@ export default function LoginPage({ onLoggedIn }) {
           Use your account email and password.
         </div>
 
-        <div
-          style={{
-            border: '1px solid var(--border)',
-            borderRadius: 14,
-            padding: 12,
-            marginBottom: 14,
-            background: 'var(--panel-solid)',
-            boxShadow: 'var(--shadow-inset)'
-          }}
-        >
-          <div style={{ fontWeight: 700, marginBottom: 4 }}>Evaluator info</div>
-          <div className="muted">Sample credentials and a quick walkthrough are listed at the bottom of each page.</div>
-        </div>
+
 
         <form onSubmit={onSubmit}>
           <div style={{ marginBottom: 12 }}>

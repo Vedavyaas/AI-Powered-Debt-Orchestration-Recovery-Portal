@@ -112,6 +112,7 @@ public class JWTConfig {
                 "/api/auth/reset-password-confirm",
                 "/api/auth/validate-reset-token"
             ).permitAll()
+            .requestMatchers("/api/auth/**").permitAll()
             .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
                 .csrf(AbstractHttpConfigurer::disable)

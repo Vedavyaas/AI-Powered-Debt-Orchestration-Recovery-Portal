@@ -20,12 +20,26 @@ function isLikelySignupKey(text) {
 export default function SignupPage() {
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
+  const [key, setKey] = useState('')
   const [password, setPassword] = useState('')
   const [role, setRole] = useState('DCA_AGENT')
   const [agencyId, setAgencyId] = useState('')
   const [loadingCreate, setLoadingCreate] = useState(false)
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
+
+  const onGetCode = async () => {
+    if (!email) return setError('Enter email first')
+    setMessage('Sending code...')
+    setError('')
+    try {
+      const res = await api.signupGetKey(email)
+      setMessage(res?.message || 'Code sent to your email')
+    } catch (e) {
+      setError(e?.message || 'Failed to send code')
+      setMessage('')
+    }
+  }
 
   const onCreate = async (e) => {
     e.preventDefault()
@@ -46,7 +60,7 @@ export default function SignupPage() {
         agencyId: agencyId.trim() || null
       }
 
-      const res = await api.signupCreateAccount(body)
+      const res = await api.signupCreateAccount(body, key)
       setMessage(typeof res === 'string' ? res : 'Account created')
       navigate('/login', { replace: true })
     } catch (e) {
@@ -68,7 +82,15 @@ export default function SignupPage() {
           <h3 style={{ marginTop: 0 }}>Create</h3>
           <form onSubmit={onCreate}>
             <label className="label">Email</label>
-            <input className="input" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@company.com" />
+            <div style={{ display: 'flex', gap: 8 }}>
+              <input className="input" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@company.com" style={{ flex: 1 }} />
+              <button type="button" className="button" style={{ width: 'auto', whiteSpace: 'nowrap' }} onClick={onGetCode}>Get Code</button>
+            </div>
+
+            <div style={{ marginTop: 12 }}>
+              <label className="label">Verification Code</label>
+              <input className="input" value={key} onChange={(e) => setKey(e.target.value)} placeholder="Check your email for code" />
+            </div>
 
             <div style={{ marginTop: 12 }}>
               <label className="label">Role</label>

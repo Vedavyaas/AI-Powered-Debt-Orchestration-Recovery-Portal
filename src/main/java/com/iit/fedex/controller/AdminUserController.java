@@ -2,6 +2,7 @@ package com.iit.fedex.controller;
 
 import com.iit.fedex.assets.Role;
 import com.iit.fedex.dto.UserManagementDTO;
+import com.iit.fedex.dto.UserSummaryDTO;
 import com.iit.fedex.repository.JWTLoginEntity;
 import com.iit.fedex.repository.JWTLoginRepository;
 import com.iit.fedex.service.AuditService;
@@ -27,30 +28,35 @@ public class AdminUserController {
     }
 
     @GetMapping("/list")
-    public List<JWTLoginEntity> listAllUsers() {
-        return jwtLoginRepository.findAll();
+    public List<UserSummaryDTO> listAllUsers() {
+        return jwtLoginRepository.findAll().stream()
+                .map(u -> new UserSummaryDTO(u.getEmail(), u.getRole(), u.getAgencyId(), true))
+                .toList();
     }
 
     @GetMapping("/list/{role}")
-    public List<JWTLoginEntity> listUsersByRole(@PathVariable Role role) {
+    public List<UserSummaryDTO> listUsersByRole(@PathVariable Role role) {
         String adminEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         Optional<JWTLoginEntity> adminOpt = jwtLoginRepository.findByEmail(adminEmail);
         
         if (adminOpt.isPresent() && adminOpt.get().getRole() == Role.FEDEX_ADMIN) {
             return jwtLoginRepository.findAll().stream()
                     .filter(u -> u.getRole() == role)
+                    .map(u -> new UserSummaryDTO(u.getEmail(), u.getRole(), u.getAgencyId(), true))
                     .toList();
         }
         return List.of();
     }
 
     @GetMapping("/agency/{agencyId}")
-    public List<JWTLoginEntity> listUsersByAgency(@PathVariable String agencyId) {
+    public List<UserSummaryDTO> listUsersByAgency(@PathVariable String agencyId) {
         String adminEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         Optional<JWTLoginEntity> adminOpt = jwtLoginRepository.findByEmail(adminEmail);
         
         if (adminOpt.isPresent() && adminOpt.get().getRole() == Role.FEDEX_ADMIN) {
-            return jwtLoginRepository.findByAgencyId(agencyId);
+            return jwtLoginRepository.findByAgencyId(agencyId).stream()
+                    .map(u -> new UserSummaryDTO(u.getEmail(), u.getRole(), u.getAgencyId(), true))
+                    .toList();
         }
         return List.of();
     }
@@ -153,10 +159,11 @@ public class AdminUserController {
     }
 
     @GetMapping("/search")
-    public List<JWTLoginEntity> searchUsers(@RequestParam String query) {
+    public List<UserSummaryDTO> searchUsers(@RequestParam String query) {
         return jwtLoginRepository.findAll().stream()
                 .filter(u -> u.getEmail().toLowerCase().contains(query.toLowerCase()) ||
                         (u.getAgencyId() != null && u.getAgencyId().toLowerCase().contains(query.toLowerCase())))
+                .map(u -> new UserSummaryDTO(u.getEmail(), u.getRole(), u.getAgencyId(), true))
                 .toList();
     }
 }

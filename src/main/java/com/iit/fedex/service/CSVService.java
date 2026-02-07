@@ -47,8 +47,9 @@ public class CSVService {
 
                     List<DebtCaseEntity> cases = it.readAll();
                     debtCaseRepository.saveAll(cases);
-                } catch (IOException e) {
-                    return "Error while reading file";
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return "Error while reading file: " + e.getMessage();
                 }
 
                 return "Uploaded successfully!";

@@ -30,9 +30,26 @@ public class ForgotPasswordService {
     }
 
     public String sendResetToken(String email) {
-        // Email is disabled (SMTP config commented out). Keep endpoint behavior explicit.
-        return "Password reset via email is disabled on this environment";
+        Optional<JWTLoginEntity> userOpt = jwtLoginRepository.findByEmail(email);
+        if (userOpt.isEmpty()) {
+            return "User not found";
+        }
 
+        String token = generateToken();
+        resetTokens.put(email, token);
+
+        org.springframework.mail.SimpleMailMessage message = new org.springframework.mail.SimpleMailMessage();
+        message.setTo(email);
+        message.setSubject("Password Reset Request");
+        message.setText("To reset your password, use this token: " + token);
+
+        try {
+            javaMailSender.send(message);
+            return "Reset token sent to email";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Failed to send email";
+        }
     }
 
     public String resetPassword(String email, String token, String newPassword) {
