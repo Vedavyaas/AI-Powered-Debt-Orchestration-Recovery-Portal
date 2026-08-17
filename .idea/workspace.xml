@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="a8f47f0d-fa05-4a22-ad28-777266803161" name="Changes" comment="" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Exception" />
+        <option value="Record" />
+        <option value="Interface" />
+        <option value="Class" />
+        <option value="Enum" />
+      </list>
+    </option>
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/Authentication/src/main/java/com/vedavyaas/authentication/service/UserDetailsServiceImpl.java" root0="FORCE_HIGHLIGHTING" />
+  </component>
+  <component name="NextEditCompletionFeaturesState">
+    <decayedCancelled>
+      <entry key="MS100" value="4.4E-323" />
+      <entry key="MS500" value="5.651582249908319E-65" />
+      <entry key="S2" value="1.7105636449819456E-16" />
+      <entry key="S5" value="1.1999301208819162E-6" />
+      <entry key="S10" value="0.0030491033468729666" />
+      <entry key="S30" value="0.7886166005312807" />
+      <entry key="S60" value="3.950545025259101" />
+      <entry key="M2" value="10.639422831434944" />
+      <entry key="M5" value="24.535470669092817" />
+      <entry key="M10" value="38.131237878307715" />
+      <entry key="M15" value="46.1500375720784" />
+      <entry key="M30" value="57.70789243013789" />
+      <entry key="H1" value="67.98507669865059" />
+      <entry key="H2" value="96.62588183540718" />
+      <entry key="H4" value="183.25783473691098" />
+      <entry key="D1" value="560.1928754124347" />
+      <entry key="W1" value="719.306126987903" />
+    </decayedCancelled>
+    <decayedSelected>
+      <entry key="MS100" value="1.0000017429951675" />
+      <entry key="MS500" value="1.0713445425350867" />
+      <entry key="S2" value="1.7756965373395177" />
+      <entry key="S5" value="2.644044840886717" />
+      <entry key="S10" value="3.2188238417798165" />
+      <entry key="S30" value="4.176114091651357" />
+      <entry key="S60" value="5.399873448203039" />
+      <entry key="M2" value="8.526301237888976" />
+      <entry key="M5" value="19.132415057285773" />
+      <entry key="M10" value="31.871648103754932" />
+      <entry key="M15" value="39.3104119024323" />
+      <entry key="M30" value="49.611429212267716" />
+      <entry key="H1" value="59.916634648565456" />
+      <entry key="H2" value="100.17256793504939" />
+      <entry key="H4" value="225.70441971428698" />
+      <entry key="D1" value="748.9350180235812" />
+      <entry key="W1" value="965.119401021491" />
+    </decayedSelected>
+    <decayedShown>
+      <entry key="MS100" value="1.229209558550827E-4" />
+      <entry key="MS500" value="0.1828214736400572" />
+      <entry key="S2" value="1.2084066833102722" />
+      <entry key="S5" value="2.3066706242065043" />
+      <entry key="S10" value="3.020990147750256" />
+      <entry key="S30" value="4.879408085758385" />
+      <entry key="S60" value="9.287205853098943" />
+      <entry key="M2" value="19.105738098143533" />
+      <entry key="M5" value="43.60340901443658" />
+      <entry key="M10" value="69.94025597365997" />
+      <entry key="M15" value="85.40510565222485" />
+      <entry key="M30" value="107.28140845575197" />
+      <entry key="H1" value="127.87843745516919" />
+      <entry key="H2" value="196.78143747214003" />
+      <entry key="H4" value="408.9450403363287" />
+      <entry key="D1" value="1309.1182268943276" />
+      <entry key="W1" value="1684.423726363219" />
+    </decayedShown>
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 7,
+  &quot;fromUser&quot;: false
+}</component>
+  <component name="ProjectId" id="3HtQzJ0SZTSiMfx77snnrD9KqTV" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Maven. [org.apache.maven.plugins:maven-archetype-plugin:RELEASE:generate].executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
+    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
+    &quot;RequestMappingsPanelWidth0&quot;: &quot;441&quot;,
+    &quot;RequestMappingsPanelWidth1&quot;: &quot;440&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;Spring Boot.AssignmentApplication.executor&quot;: &quot;Run&quot;,
+    &quot;Spring Boot.AuthenticationApplication.executor&quot;: &quot;Run&quot;,
+    &quot;Spring Boot.DiscoveryApplication.executor&quot;: &quot;Run&quot;,
+    &quot;Spring Boot.GatewayApplication.executor&quot;: &quot;Run&quot;,
+    &quot;Spring Boot.OrchestrationApplication.executor&quot;: &quot;Run&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;run.configurations.included.in.services&quot;: &quot;true&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="RunDashboard">
+    <option name="configurationTypes">
+      <set>
+        <option value="MicronautRunConfigurationType" />
+        <option value="QuarkusRunConfigurationType" />
+        <option value="SpringBootApplicationConfigurationType" />
+      </set>
+    </option>
+    <option name="configurationStatuses">
+      <map>
+        <entry key="SpringBootApplicationConfigurationType">
+          <value>
+            <map>
+              <entry key="AssignmentApplication" value="STOPPED" />
+              <entry key="AuthenticationApplication" value="STOPPED" />
+              <entry key="DiscoveryApplication" value="STOPPED" />
+              <entry key="GatewayApplication" value="STOPPED" />
+              <entry key="OrchestrationApplication" value="STOPPED" />
+            </map>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="RunManager" selected="Spring Boot.DiscoveryApplication">
+    <configuration name="AssignmentApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <module name="Assignment" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.vedavyaas.assignment.AssignmentApplication" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="AuthenticationApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <module name="Authentication" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.vedavyaas.authentication.AuthenticationApplication" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="DiscoveryApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <module name="Discovery" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.vedavyaas.discovery.DiscoveryApplication" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="GatewayApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <module name="Gateway" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.vedavyaas.gateway.GatewayApplication" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="OrchestrationApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <module name="Orchestration" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.vedavyaas.orchestration.OrchestrationApplication" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-30f59d01ecdd-37e91769500f-intellij.indexing.shared.core-IU-261.25134.95" />
+        <option value="bundled-js-predefined-d6986cc7102b-31caf2ab9e3c-JavaScript-IU-261.25134.95" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="a8f47f0d-fa05-4a22-ad28-777266803161" name="Changes" comment="" />
+      <created>1783943513996</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1783943513996</updated>
+      <workItem from="1783943515036" duration="1276000" />
+      <workItem from="1786685146839" duration="395000" />
+      <workItem from="1786686258976" duration="21000" />
+      <workItem from="1786710729038" duration="4243000" />
+      <workItem from="1786807355925" duration="207000" />
+      <workItem from="1786808706585" duration="3149000" />
+      <workItem from="1786862837401" duration="1000" />
+      <workItem from="1786865443302" duration="11283000" />
+      <workItem from="1786938847890" duration="3874000" />
+      <workItem from="1786945481818" duration="8344000" />
+      <workItem from="1786983798242" duration="883000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>
