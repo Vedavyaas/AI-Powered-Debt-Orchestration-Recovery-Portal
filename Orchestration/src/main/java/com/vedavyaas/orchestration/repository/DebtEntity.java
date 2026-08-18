@@ -12,13 +12,21 @@ public class DebtEntity {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
+    private String debtName;
+
     @ManyToOne
     @JoinColumn(name = "customer_entity_id")
     private CustomerEntity customerEntity;
 
+    @ManyToOne
+    @JoinColumn(name = "manager_name_id")
+    private ManagerEntity managerName;
+
     private Double principalAmount;
     private Double outstandingAmount;
     private Date dueDate;
+
+    @Enumerated(value = EnumType.STRING)
     private Status status;
     private Instant createdAt;
     private Instant modifiedAt;
@@ -26,8 +34,10 @@ public class DebtEntity {
     public DebtEntity() {
     }
 
-    public DebtEntity(CustomerEntity customerEntity, Double principalAmount, Double outstandingAmount, Date dueDate, Status status) {
+    public DebtEntity(String debtName, CustomerEntity customerEntity, ManagerEntity managerName, Double principalAmount, Double outstandingAmount, Date dueDate, Status status) {
+        this.debtName = debtName;
         this.customerEntity = customerEntity;
+        this.managerName = managerName;
         this.principalAmount = principalAmount;
         this.outstandingAmount = outstandingAmount;
         this.dueDate = dueDate;
@@ -43,12 +53,28 @@ public class DebtEntity {
         return id;
     }
 
+    public String getDebtName() {
+        return debtName;
+    }
+
+    public void setDebtName(String debtName) {
+        this.debtName = debtName;
+    }
+
     public CustomerEntity getCustomerEntity() {
         return customerEntity;
     }
 
     public void setCustomerEntity(CustomerEntity customerEntity) {
         this.customerEntity = customerEntity;
+    }
+
+    public ManagerEntity getManagerName() {
+        return managerName;
+    }
+
+    public void setManagerName(ManagerEntity managerName) {
+        this.managerName = managerName;
     }
 
     public Double getPrincipalAmount() {

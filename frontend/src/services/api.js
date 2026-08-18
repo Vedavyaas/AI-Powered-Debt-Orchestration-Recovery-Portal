@@ -118,4 +118,53 @@ export const agentService = {
   },
 };
 
+const ORCH_API_BASE_URL = 'http://localhost:9000/ORCHESTRATION';
+
+const orchApi = axios.create({
+  baseURL: ORCH_API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+orchApi.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('dca_auth_token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+export const orchestrationService = {
+  createCustomer: async (customerData) => {
+    const response = await orchApi.post('/api/debt/customer', customerData);
+    return response.data;
+  },
+  getCustomers: async (pageStart = 0, pageSize = 100) => {
+    const response = await orchApi.get('/api/debt/customer', { params: { pageStart, pageSize } });
+    return response.data;
+  },
+  createDebt: async (debtData) => {
+    const response = await orchApi.post('/api/debt', debtData);
+    return response.data;
+  },
+  getDebts: async (pageStart = 0, pageSize = 100) => {
+    const response = await orchApi.get('/api/debt', { params: { pageStart, pageSize } });
+    return response.data;
+  },
+  bulkIngestion: async (file) => {
+    const formData = new FormData();
+    formData.append('multipartFile', file);
+    const response = await orchApi.post('/api/debt/bulk', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+};
+
 export default api;

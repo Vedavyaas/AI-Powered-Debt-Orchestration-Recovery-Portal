@@ -90,6 +90,24 @@ export const Login = () => {
           {error   && <div className="alert alert-error"   style={{ marginBottom: 16 }}>{error}</div>}
           {success && <div className="alert alert-success" style={{ marginBottom: 16 }}>{success}</div>}
 
+          {/* Test Credentials */}
+          {mode === 'signin' && (
+            <div style={{ display: 'flex', gap: 8, marginBottom: 16, justifyContent: 'center' }}>
+              <button type="button" className="btn btn-ghost" style={{ fontSize: '0.75rem', padding: '4px 10px' }}
+                onClick={() => { setName('Admin'); setPassword('123'); }}>
+                Admin
+              </button>
+              <button type="button" className="btn btn-ghost" style={{ fontSize: '0.75rem', padding: '4px 10px' }}
+                onClick={() => { setName('Manager'); setPassword('123'); }}>
+                Manager
+              </button>
+              <button type="button" className="btn btn-ghost" style={{ fontSize: '0.75rem', padding: '4px 10px' }}
+                onClick={() => { setName('Agent'); setPassword('123'); }}>
+                Agent
+              </button>
+            </div>
+          )}
+
           {/* Form */}
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 13 }}>
 

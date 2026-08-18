@@ -43,7 +43,8 @@ public class JWTConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity security) {
+    public SecurityFilterChain securityFilterChain(HttpSecurity security) throws Exception {
+        security.authorizeHttpRequests(request -> request.requestMatchers("/h2-console/**").permitAll());
         security.authorizeHttpRequests(request -> request.anyRequest().authenticated());
         security.csrf(AbstractHttpConfigurer::disable);
         security.headers(AbstractHttpConfigurer::disable);

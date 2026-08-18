@@ -1,9 +1,6 @@
 package com.vedavyaas.orchestration.repository;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 @Entity
 public class CustomerEntity {
@@ -15,13 +12,18 @@ public class CustomerEntity {
     private String phoneNumber;
     private String email;
 
+    @ManyToOne
+    @JoinColumn(name = "manager_id")
+    private ManagerEntity manager;
+
     public CustomerEntity() {
     }
 
-    public CustomerEntity(String name, String phoneNumber, String email) {
+    public CustomerEntity(String name, String phoneNumber, String email, ManagerEntity managerEntity) {
         this.name = name;
         this.phoneNumber = phoneNumber;
         this.email = email;
+        this.manager = managerEntity;
     }
 
     public void setId(Long id) {
@@ -54,5 +56,13 @@ public class CustomerEntity {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public ManagerEntity getManager() {
+        return manager;
+    }
+
+    public void setManager(ManagerEntity manager) {
+        this.manager = manager;
     }
 }

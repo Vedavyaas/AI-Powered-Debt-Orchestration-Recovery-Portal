@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { managerService } from '../services/api';
+import { managerService, orchestrationService } from '../services/api';
 import {
   UserPlus, Users, User, LogOut,
   Building, Mail, Power,
   RefreshCw, CheckCircle2, AlertCircle,
-  Briefcase
+  Briefcase, Wallet, CreditCard, UploadCloud, Download
 } from 'lucide-react';
 
 const NAV = [
-  { id: 'agents',   icon: <Users size={18} />,    label: 'Agents' },
-  { id: 'create',   icon: <UserPlus size={18} />, label: 'Add Agent' },
-  { id: 'profile',  icon: <User size={18} />,     label: 'My Profile' },
+  { id: 'agents', icon: <Users size={18} />, label: 'Agents' },
+  { id: 'create', icon: <UserPlus size={18} />, label: 'Add Agent' },
+  { id: 'debts', icon: <Wallet size={18} />, label: 'Debts' },
+  { id: 'profile', icon: <User size={18} />, label: 'My Profile' },
 ];
 
 export const ManagerDashboard = () => {
@@ -22,7 +23,20 @@ export const ManagerDashboard = () => {
   const [loadingAgt, setLoadingAgt] = useState(false);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-  
+
+  // Debts and Customers state
+  const [customers, setCustomers] = useState([]);
+  const [debts, setDebts] = useState([]);
+  const [loadingDebts, setLoadingDebts] = useState(false);
+  const [debtPage, setDebtPage] = useState(0);
+  const [debtTotalPages, setDebtTotalPages] = useState(0);
+  const [debtTab, setDebtTab] = useState('list_debts'); // list_debts, create_customer, create_debt
+  const [createMode, setCreateMode] = useState('single'); // single, bulk
+  const [customerForm, setCustomerForm] = useState({ name: '', email: '', phoneNumber: '' });
+  const [debtForm, setDebtForm] = useState({ debtName: '', customerId: '', principalAmount: '', outStandingAmount: '', dueDate: '', status: 'ACTIVE' });
+  const [creatingDebtOrCust, setCreatingDebtOrCust] = useState(false);
+  const [uploadingBulk, setUploadingBulk] = useState(false);
+
   // Inline editing state
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState({ name: '', email: '' });
@@ -41,10 +55,10 @@ export const ManagerDashboard = () => {
     setCreating(true);
     try {
       await managerService.createEmployee({
-        name: form.name, 
+        name: form.name,
         password: form.password,
-        email: form.email, 
-        company: user?.company, 
+        email: form.email,
+        company: user?.company,
         role: 'AGENT',
       });
       notify(`Agent "${form.name}" created successfully`);
@@ -71,7 +85,84 @@ export const ManagerDashboard = () => {
     }
   };
 
-  useEffect(() => { fetchAgents(page); }, [page]);
+  const fetchDebtsData = async (pageNum = debtPage) => {
+    setLoadingDebts(true);
+    try {
+      const [cData, dData] = await Promise.all([
+        orchestrationService.getCustomers(0, 100),
+        orchestrationService.getDebts(pageNum, 5)
+      ]);
+      setCustomers(cData?.content ?? []);
+      setDebts(dData?.content ?? []);
+      setDebtTotalPages(dData?.totalPages ?? 1);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingDebts(false);
+    }
+  };
+
+  useEffect(() => {
+    if (tab === 'agents') {
+      fetchAgents(page);
+    } else if (tab === 'debts') {
+      fetchDebtsData(debtPage);
+    }
+  }, [page, debtPage, tab]);
+
+  const handleCreateCustomer = async (e) => {
+    e.preventDefault();
+    setCreatingDebtOrCust(true);
+    try {
+      const msg = await orchestrationService.createCustomer(customerForm);
+      notify(msg || `Customer "${customerForm.name}" created successfully`);
+      setCustomerForm({ name: '', email: '', phoneNumber: '' });
+      setDebtTab('list_debts');
+      setDebtPage(0);
+      fetchDebtsData(0);
+    } catch (err) {
+      notify(err.response?.data?.message || err.message || 'Failed to create customer', 'error');
+    } finally {
+      setCreatingDebtOrCust(false);
+    }
+  };
+
+  const handleCreateDebt = async (e) => {
+    e.preventDefault();
+    setCreatingDebtOrCust(true);
+    try {
+      const msg = await orchestrationService.createDebt(debtForm);
+      notify(msg || `Debt created successfully`);
+      setDebtForm({ debtName: '', customerId: '', principalAmount: '', outStandingAmount: '', dueDate: '', status: 'ACTIVE' });
+      setDebtTab('list_debts');
+      setDebtPage(0);
+      fetchDebtsData(0);
+    } catch (err) {
+      notify(err.response?.data?.message || err.message || 'Failed to create debt', 'error');
+    } finally {
+      setCreatingDebtOrCust(false);
+    }
+  };
+
+  const handleBulkUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setUploadingBulk(true);
+    try {
+      const msg = await orchestrationService.bulkIngestion(file);
+      notify(msg || 'Bulk upload successful');
+      setDebtPage(0);
+      fetchDebtsData(0);
+      setDebtTab('list_debts');
+    } catch (err) {
+      notify(err.response?.data?.message || err.message || 'Failed to upload bulk data', 'error');
+    } finally {
+      setUploadingBulk(false);
+      // Reset the file input
+      e.target.value = null;
+    }
+  };
 
   const handleToggle = async (id) => {
     try {
@@ -233,8 +324,8 @@ export const ManagerDashboard = () => {
               marginBottom: 24
             }}>
               {[
-                { label: 'Total',    value: agents.length, color: '#0e7490' },
-                { label: 'Active',   value: agents.filter(m => m.enabled !== false).length, color: '#047857' },
+                { label: 'Total', value: agents.length, color: '#0e7490' },
+                { label: 'Active', value: agents.filter(m => m.enabled !== false).length, color: '#047857' },
                 { label: 'Inactive', value: agents.filter(m => m.enabled === false).length, color: '#b91c1c' },
               ].map((s, i) => (
                 <div key={i} className="glass-card" style={{ padding: '16px 20px' }}>
@@ -279,7 +370,7 @@ export const ManagerDashboard = () => {
                             <td>{m.id}</td>
                             <td>
                               {isEditing ? (
-                                <input className="fi" style={{ padding: '6px 10px', fontSize: '0.8rem' }} 
+                                <input className="fi" style={{ padding: '6px 10px', fontSize: '0.8rem' }}
                                   value={editForm.name} onChange={e => setEditForm(f => ({ ...f, name: e.target.value }))} />
                               ) : (
                                 <span style={{ color: 'var(--t1)', fontWeight: 500 }}>{m.name}</span>
@@ -326,7 +417,7 @@ export const ManagerDashboard = () => {
                   </table>
                 )}
               </div>
-              
+
               {/* Pagination */}
               {totalPages > 1 && (
                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 12, padding: '12px', borderTop: '1px solid rgba(180,200,220,0.28)' }}>
@@ -379,6 +470,243 @@ export const ManagerDashboard = () => {
           </div>
         )}
 
+        {/* ── Debts tab ── */}
+        {tab === 'debts' && (
+          <div className="fade-up">
+            <div style={{ display: 'flex', gap: 10, marginBottom: 20 }}>
+              <button className={`btn ${debtTab === 'list_debts' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setDebtTab('list_debts')}>
+                <Wallet size={14} /> View Debts
+              </button>
+              <button className={`btn ${debtTab === 'create_customer' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setDebtTab('create_customer')}>
+                <UserPlus size={14} /> Create Customer
+              </button>
+              <button className={`btn ${debtTab === 'create_debt' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setDebtTab('create_debt')}>
+                <CreditCard size={14} /> Create Debt
+              </button>
+            </div>
+
+            {debtTab === 'list_debts' && (
+              <div className="win">
+                <div style={{ padding: '13px 20px', borderBottom: '1px solid rgba(180,200,220,0.28)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.86rem', fontWeight: 600, color: 'var(--t1)' }}>All Debts</span>
+                  <button className="btn btn-ghost" style={{ padding: '5px 11px', fontSize: '0.78rem' }} onClick={() => fetchDebtsData(debtPage)}>
+                    <RefreshCw size={13} style={loadingDebts ? { animation: 'spin 0.7s linear infinite' } : {}} /> Refresh
+                  </button>
+                </div>
+                <div style={{ overflowX: 'auto' }}>
+                  {debts.length === 0 ? (
+                    <div style={{ padding: '48px 24px', textAlign: 'center', color: 'var(--t3)', fontSize: '0.86rem' }}>
+                      {loadingDebts ? 'Loading…' : 'No debts found.'}
+                    </div>
+                  ) : (
+                    <table className="gtable">
+                      <thead>
+                        <tr>
+                          <th>ID</th>
+                          <th>Debt Name</th>
+                          <th>Customer</th>
+                          <th>Principal</th>
+                          <th>Outstanding</th>
+                          <th>Due Date</th>
+                          <th>Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {debts.map(d => (
+                          <tr key={d.id}>
+                            <td>{d.id}</td>
+                            <td><span style={{ color: 'var(--t1)', fontWeight: 500 }}>{d.debtName}</span></td>
+                            <td>
+                              {d.customerName || d.customerId}
+                            </td>
+                            <td>${d.principalAmount}</td>
+                            <td>${d.outstandingAmount}</td>
+                            <td>{new Date(d.dueDate).toLocaleDateString()}</td>
+                            <td>
+                              <span className={`badge ${d.status === 'ACTIVE' ? 'badge-on' : 'badge-off'}`}>
+                                {d.status}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+                </div>
+
+                {/* Pagination for Debts */}
+                {debtTotalPages > 1 && (
+                  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 12, padding: '12px', borderTop: '1px solid rgba(180,200,220,0.28)' }}>
+                    <button className="btn btn-ghost" style={{ padding: '4px 12px' }} disabled={debtPage === 0} onClick={() => setDebtPage(p => p - 1)}>Prev</button>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--t2)', fontWeight: 600 }}>Page {debtPage + 1} of {debtTotalPages}</span>
+                    <button className="btn btn-ghost" style={{ padding: '4px 12px' }} disabled={debtPage >= debtTotalPages - 1} onClick={() => setDebtPage(p => p + 1)}>Next</button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {debtTab === 'create_customer' && (
+              <div className="win fade-up" style={{ maxWidth: 460, margin: '0 auto' }}>
+                <div style={{ padding: '14px 20px', borderBottom: '1px solid rgba(180,200,220,0.28)' }}>
+                  <span style={{ fontSize: '0.86rem', fontWeight: 600, color: 'var(--t1)' }}>Create Customer</span>
+                </div>
+                <div style={{ padding: '24px' }}>
+                  <form onSubmit={handleCreateCustomer} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                    <div className="field">
+                      <label>Name</label>
+                      <input className="fi" style={{ paddingLeft: 14 }} type="text" required
+                        value={customerForm.name} onChange={e => setCustomerForm(f => ({ ...f, name: e.target.value }))} />
+                    </div>
+                    <div className="field">
+                      <label>Email</label>
+                      <input className="fi" style={{ paddingLeft: 14 }} type="email" required
+                        value={customerForm.email} onChange={e => setCustomerForm(f => ({ ...f, email: e.target.value }))} />
+                    </div>
+                    <div className="field">
+                      <label>Phone Number</label>
+                      <input className="fi" style={{ paddingLeft: 14 }} type="tel" required
+                        value={customerForm.phoneNumber} onChange={e => setCustomerForm(f => ({ ...f, phoneNumber: e.target.value }))} />
+                    </div>
+                    <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
+                      <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={creatingDebtOrCust}>
+                        {creatingDebtOrCust && <span className="spinner" />}
+                        {creatingDebtOrCust ? 'Creating…' : 'Create Customer'}
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
+
+            {debtTab === 'create_debt' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 20, maxWidth: 500, margin: '0 auto' }}>
+                
+                {/* Sub-navigation for Create Debt */}
+                <div style={{ display: 'flex', background: 'rgba(255,255,255,0.6)', padding: '6px', borderRadius: '12px', border: '1px solid rgba(180,200,220,0.3)', marginBottom: 10 }}>
+                  <button 
+                    onClick={() => setCreateMode('single')}
+                    style={{ 
+                      flex: 1, padding: '8px 16px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, transition: 'all 0.2s',
+                      background: createMode === 'single' ? 'rgba(14,116,144,0.08)' : 'transparent',
+                      color: createMode === 'single' ? 'var(--cyan)' : 'var(--t2)',
+                    }}
+                  >
+                    <CreditCard size={15} /> Single Debt
+                  </button>
+                  <button 
+                    onClick={() => setCreateMode('bulk')}
+                    style={{ 
+                      flex: 1, padding: '8px 16px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, transition: 'all 0.2s',
+                      background: createMode === 'bulk' ? 'rgba(14,116,144,0.08)' : 'transparent',
+                      color: createMode === 'bulk' ? 'var(--cyan)' : 'var(--t2)',
+                    }}
+                  >
+                    <UploadCloud size={15} /> Bulk Upload
+                  </button>
+                </div>
+
+                {createMode === 'single' && (
+                  <div className="win fade-up">
+                    <div style={{ padding: '14px 20px', borderBottom: '1px solid rgba(180,200,220,0.28)' }}>
+                      <span style={{ fontSize: '0.86rem', fontWeight: 600, color: 'var(--t1)' }}>Create Single Debt</span>
+                    </div>
+                    <div style={{ padding: '24px' }}>
+                      <form onSubmit={handleCreateDebt} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                        <div className="field">
+                          <label>Customer</label>
+                          <select className="fi" style={{ paddingLeft: 14, backgroundColor: 'transparent' }} required
+                            value={debtForm.customerId} onChange={e => setDebtForm(f => ({ ...f, customerId: e.target.value }))}>
+                            <option value="">-- Select Customer --</option>
+                            {customers.map(c => (
+                              <option key={c.id} value={c.id}>{c.customerName} ({c.email})</option>
+                            ))}
+                          </select>
+                          {customers.length === 0 && <span style={{ fontSize: '0.75rem', color: '#b91c1c', marginTop: 4 }}>No customers available. Create one first.</span>}
+                        </div>
+                        <div className="field">
+                          <label>Debt Name / Reference</label>
+                          <input className="fi" style={{ paddingLeft: 14 }} type="text" required
+                            value={debtForm.debtName} onChange={e => setDebtForm(f => ({ ...f, debtName: e.target.value }))} />
+                        </div>
+                        <div className="field">
+                          <label>Principal Amount ($)</label>
+                          <input className="fi" style={{ paddingLeft: 14 }} type="number" step="0.01" min="0" required
+                            value={debtForm.principalAmount} onChange={e => setDebtForm(f => ({ ...f, principalAmount: e.target.value }))} />
+                        </div>
+                        <div className="field">
+                          <label>Outstanding Amount ($)</label>
+                          <input className="fi" style={{ paddingLeft: 14 }} type="number" step="0.01" min="0" required
+                            value={debtForm.outStandingAmount} onChange={e => setDebtForm(f => ({ ...f, outStandingAmount: e.target.value }))} />
+                        </div>
+                        <div className="field">
+                          <label>Due Date</label>
+                          <input className="fi" style={{ paddingLeft: 14 }} type="date" required
+                            value={debtForm.dueDate} onChange={e => setDebtForm(f => ({ ...f, dueDate: e.target.value }))} />
+                        </div>
+                        <div className="field">
+                          <label>Status</label>
+                          <select className="fi" style={{ paddingLeft: 14, backgroundColor: 'transparent' }} required
+                            value={debtForm.status} onChange={e => setDebtForm(f => ({ ...f, status: e.target.value }))}>
+                            <option value="ACTIVE">ACTIVE</option>
+                            <option value="PENDING">PENDING</option>
+                            <option value="OVERDUE">OVERDUE</option>
+                            <option value="IN_COLLECTION">IN_COLLECTION</option>
+                            <option value="PARTIALLY_SETTLED">PARTIALLY_SETTLED</option>
+                          </select>
+                        </div>
+                        <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
+                          <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={creatingDebtOrCust || customers.length === 0}>
+                            {creatingDebtOrCust && <span className="spinner" />}
+                            {creatingDebtOrCust ? 'Creating…' : 'Create Debt'}
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                )}
+                
+                {createMode === 'bulk' && (
+                  <div className="win fade-up">
+                    <div style={{ padding: '14px 20px', borderBottom: '1px solid rgba(180,200,220,0.28)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '0.86rem', fontWeight: 600, color: 'var(--t1)' }}>Bulk Upload Debts</span>
+                      <a href="/sample_debts.csv" download className="btn btn-ghost" style={{ padding: '5px 11px', fontSize: '0.78rem', textDecoration: 'none' }}>
+                        <Download size={14} style={{ marginRight: 4 }} /> Sample CSV
+                      </a>
+                    </div>
+                    <div style={{ padding: '36px 24px', display: 'flex', flexDirection: 'column', gap: 16, alignItems: 'center' }}>
+                      <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(14,116,144,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0e7490', marginBottom: 8 }}>
+                        <UploadCloud size={32} />
+                      </div>
+                      <div style={{ textAlign: 'center', color: 'var(--t2)', fontSize: '0.9rem', marginBottom: 12, lineHeight: 1.5 }}>
+                        Upload a CSV file to ingest multiple debts at once. <br/>
+                        Ensure your file follows the required format.
+                      </div>
+                      <label className="btn btn-primary" style={{ minWidth: 200, display: 'flex', justifyContent: 'center', padding: '14px', cursor: uploadingBulk ? 'not-allowed' : 'pointer' }}>
+                        {uploadingBulk ? (
+                          <>
+                            <span className="spinner" style={{ marginRight: 8 }} /> Uploading...
+                          </>
+                        ) : (
+                          <>
+                            Select CSV File
+                          </>
+                        )}
+                        <input 
+                          type="file" 
+                          accept=".csv" 
+                          style={{ display: 'none' }} 
+                          onChange={handleBulkUpload}
+                          disabled={uploadingBulk}
+                        />
+                      </label>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* ── Profile tab ── */}
         {tab === 'profile' && (
           <div className="win fade-up" style={{ maxWidth: 460, margin: '0 auto' }}>
@@ -397,7 +725,7 @@ export const ManagerDashboard = () => {
                 </button>
               )}
             </div>
-            
+
             {isEditingProfile ? (
               <div style={{ padding: '24px' }}>
                 <form onSubmit={handleUpdateProfile} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -426,9 +754,9 @@ export const ManagerDashboard = () => {
               <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
                 {[
                   { label: 'Username', value: user?.name, icon: <User size={14} color="var(--t3)" /> },
-                  { label: 'Company',  value: user?.company || '—', icon: <Building size={14} color="var(--t3)" /> },
-                  { label: 'Email',    value: user?.email   || '—', icon: <Mail size={14} color="var(--t3)" /> },
-                  { label: 'Role',     value: 'Manager', icon: <Briefcase size={14} color="#0e7490" /> },
+                  { label: 'Company', value: user?.company || '—', icon: <Building size={14} color="var(--t3)" /> },
+                  { label: 'Email', value: user?.email || '—', icon: <Mail size={14} color="var(--t3)" /> },
+                  { label: 'Role', value: 'Manager', icon: <Briefcase size={14} color="#0e7490" /> },
                 ].map((row, i) => (
                   <div key={i} style={{
                     display: 'flex',

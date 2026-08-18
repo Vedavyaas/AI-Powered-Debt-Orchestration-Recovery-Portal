@@ -1,0 +1,12 @@
+debt_name,customer_name,customer_email,customer_phone_number,principal_amount,outstanding_amount,due_date,status
+Personal Loan 001,John Doe,john@example.com,1234567890,5000,2500,2026-10-15,ACTIVE
+Auto Loan 002,Jane Smith,jane.smith@example.com,0987654321,15000,12000,2026-11-01,ACTIVE
+Credit Card 003,Alice Johnson,alice.j@example.com,5551234567,2000,500,2026-09-20,PENDING
+Medical Bill 004,Bob Brown,bob.b@example.com,5559876543,1500,1500,2026-08-30,OVERDUE
+Student Loan 005,Charlie Davis,charlie.d@example.com,5552345678,25000,20000,2027-01-10,ACTIVE
+Mortgage 006,Diana Prince,diana.p@example.com,5558765432,250000,240000,2026-12-01,ACTIVE
+Equipment Lease 007,Evan Wright,evan.w@example.com,5553456789,10000,8000,2026-09-15,PENDING
+Furniture Store 008,Fiona Gallagher,fiona.g@example.com,5557654321,800,200,2026-08-25,OVERDUE
+Utility Bill 009,George Harris,george.h@example.com,5554567890,150,150,2026-08-20,OVERDUE
+Tax Debt 010,Hannah Lee,hannah.l@example.com,5556543210,3000,3000,2026-10-31,IN_COLLECTION
+Personal Loan 011,Ian Martin,ian.m@example.com,5555678901,4000,1000,2026-09-05,ACTIVE
