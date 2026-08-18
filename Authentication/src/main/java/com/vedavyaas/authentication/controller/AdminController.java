@@ -38,8 +38,8 @@ public class AdminController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<String> alterSelf(@PathVariable Long id, @RequestBody UserDTO userDTO, @AuthenticationPrincipal Jwt jwt) {
-        return ResponseEntity.ok(userService.alterEmployees(id, userDTO, jwt.getSubject()));
+    public ResponseEntity<String> alterSelf(@PathVariable Long id, @RequestParam String email, @AuthenticationPrincipal Jwt jwt) {
+        return ResponseEntity.ok(userService.alterEmployees(id, email, jwt.getSubject()));
     }
 
     @PostMapping("/create")
@@ -62,7 +62,7 @@ public class AdminController {
     }
 
     @PutMapping("/employee/{id}")
-    public ResponseEntity<String> alterWorkers(@PathVariable Long id, @RequestBody UserDTO userDTO, @AuthenticationPrincipal Jwt jwt) {
-        return ResponseEntity.ok(userService.alterEmployees(id, userDTO, jwt.getSubject()));
+    public ResponseEntity<String> alterWorkers(@PathVariable Long id, @RequestParam String email, @AuthenticationPrincipal Jwt jwt) {
+        return ResponseEntity.ok(userService.alterEmployees(id, email, jwt.getSubject()));
     }
 }

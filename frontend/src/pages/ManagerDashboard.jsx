@@ -5,7 +5,7 @@ import {
   UserPlus, Users, User, LogOut,
   Building, Mail, Power,
   RefreshCw, CheckCircle2, AlertCircle,
-  Briefcase, Wallet, CreditCard, UploadCloud, Download
+  Briefcase, Wallet, CreditCard, UploadCloud, Download, Edit2, X
 } from 'lucide-react';
 
 const NAV = [
@@ -40,6 +40,13 @@ export const ManagerDashboard = () => {
   // Inline editing state
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState({ name: '', email: '' });
+  
+  const [editingDebtId, setEditingDebtId] = useState(null);
+  const [editDebtForm, setEditDebtForm] = useState({ debtName: '', customerId: '', principalAmount: '', outStandingAmount: '', dueDate: '', status: 'ACTIVE' });
+
+  const [editingCustomerId, setEditingCustomerId] = useState(null);
+  const [editCustomerForm, setEditCustomerForm] = useState({ phoneNumber: '', email: '' });
+  const [customerPage, setCustomerPage] = useState(0);
 
   const [form, setForm] = useState({ name: '', password: '', email: '' });
   const [creating, setCreating] = useState(false);
@@ -85,16 +92,22 @@ export const ManagerDashboard = () => {
     }
   };
 
-  const fetchDebtsData = async (pageNum = debtPage) => {
+  const fetchDebtsData = async () => {
     setLoadingDebts(true);
     try {
       const [cData, dData] = await Promise.all([
         orchestrationService.getCustomers(0, 100),
-        orchestrationService.getDebts(pageNum, 5)
+        orchestrationService.getDebts(0, 1000)
       ]);
       setCustomers(cData?.content ?? []);
-      setDebts(dData?.content ?? []);
-      setDebtTotalPages(dData?.totalPages ?? 1);
+      const allDebts = dData?.content ?? [];
+      const sortedDebts = [...allDebts].sort((a, b) => {
+        if (a.status === 'CLOSED' && b.status !== 'CLOSED') return 1;
+        if (a.status !== 'CLOSED' && b.status === 'CLOSED') return -1;
+        return 0;
+      });
+      setDebts(sortedDebts);
+      setDebtTotalPages(Math.ceil(sortedDebts.length / 5) || 1);
     } catch (err) {
       console.error(err);
     } finally {
@@ -106,9 +119,9 @@ export const ManagerDashboard = () => {
     if (tab === 'agents') {
       fetchAgents(page);
     } else if (tab === 'debts') {
-      fetchDebtsData(debtPage);
+      fetchDebtsData();
     }
-  }, [page, debtPage, tab]);
+  }, [page, tab]);
 
   const handleCreateCustomer = async (e) => {
     e.preventDefault();
@@ -139,6 +152,37 @@ export const ManagerDashboard = () => {
       fetchDebtsData(0);
     } catch (err) {
       notify(err.response?.data?.message || err.message || 'Failed to create debt', 'error');
+    } finally {
+      setCreatingDebtOrCust(false);
+    }
+  };
+
+  const handleAlterDebt = async (e) => {
+    e.preventDefault();
+    setCreatingDebtOrCust(true);
+    try {
+      const payload = { ...editDebtForm, debtName: null };
+      const msg = await orchestrationService.alterDebt(editingDebtId, payload);
+      notify(msg || `Debt altered successfully`);
+      setEditingDebtId(null);
+      fetchDebtsData();
+    } catch (err) {
+      notify(err.response?.data?.message || err.message || 'Failed to alter debt', 'error');
+    } finally {
+      setCreatingDebtOrCust(false);
+    }
+  };
+
+  const handleAlterCustomer = async (e) => {
+    e.preventDefault();
+    setCreatingDebtOrCust(true);
+    try {
+      const msg = await orchestrationService.alterCustomer(editingCustomerId, editCustomerForm.phoneNumber, editCustomerForm.email);
+      notify(msg || `Customer altered successfully`);
+      setEditingCustomerId(null);
+      fetchDebtsData();
+    } catch (err) {
+      notify(err.response?.data?.message || err.message || 'Failed to alter customer', 'error');
     } finally {
       setCreatingDebtOrCust(false);
     }
@@ -181,7 +225,7 @@ export const ManagerDashboard = () => {
 
   const saveEdit = async (m) => {
     try {
-      await managerService.updateEmployee(m.id, { ...m, name: editForm.name, email: editForm.email });
+      await managerService.updateEmployee(m.id, editForm.email);
       notify('Agent updated successfully');
       setEditingId(null);
       fetchAgents();
@@ -201,14 +245,7 @@ export const ManagerDashboard = () => {
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
     try {
-      await managerService.updateSelf(user.id, {
-        id: user.id,
-        name: profileForm.name,
-        company: profileForm.company,
-        email: profileForm.email,
-        role: 'MANAGER',
-        enabled: true
-      });
+      await managerService.updateSelf(user.id, profileForm.email);
       notify('Profile updated successfully');
       setUser(prev => ({ ...prev, ...profileForm }));
       setIsEditingProfile(false);
@@ -370,8 +407,8 @@ export const ManagerDashboard = () => {
                             <td>{m.id}</td>
                             <td>
                               {isEditing ? (
-                                <input className="fi" style={{ padding: '6px 10px', fontSize: '0.8rem' }}
-                                  value={editForm.name} onChange={e => setEditForm(f => ({ ...f, name: e.target.value }))} />
+                                <input className="fi" style={{ padding: '6px 10px', fontSize: '0.8rem', opacity: 0.7, cursor: 'not-allowed' }}
+                                  value={editForm.name} disabled />
                               ) : (
                                 <span style={{ color: 'var(--t1)', fontWeight: 500 }}>{m.name}</span>
                               )}
@@ -477,6 +514,9 @@ export const ManagerDashboard = () => {
               <button className={`btn ${debtTab === 'list_debts' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setDebtTab('list_debts')}>
                 <Wallet size={14} /> View Debts
               </button>
+              <button className={`btn ${debtTab === 'list_customers' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setDebtTab('list_customers')}>
+                <Users size={14} /> View Customers
+              </button>
               <button className={`btn ${debtTab === 'create_customer' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setDebtTab('create_customer')}>
                 <UserPlus size={14} /> Create Customer
               </button>
@@ -489,7 +529,7 @@ export const ManagerDashboard = () => {
               <div className="win">
                 <div style={{ padding: '13px 20px', borderBottom: '1px solid rgba(180,200,220,0.28)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ fontSize: '0.86rem', fontWeight: 600, color: 'var(--t1)' }}>All Debts</span>
-                  <button className="btn btn-ghost" style={{ padding: '5px 11px', fontSize: '0.78rem' }} onClick={() => fetchDebtsData(debtPage)}>
+                  <button className="btn btn-ghost" style={{ padding: '5px 11px', fontSize: '0.78rem' }} onClick={() => fetchDebtsData()}>
                     <RefreshCw size={13} style={loadingDebts ? { animation: 'spin 0.7s linear infinite' } : {}} /> Refresh
                   </button>
                 </div>
@@ -509,10 +549,11 @@ export const ManagerDashboard = () => {
                           <th>Outstanding</th>
                           <th>Due Date</th>
                           <th>Status</th>
+                          <th>Actions</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {debts.map(d => (
+                        {debts.slice(debtPage * 5, (debtPage + 1) * 5).map(d => (
                           <tr key={d.id}>
                             <td>{d.id}</td>
                             <td><span style={{ color: 'var(--t1)', fontWeight: 500 }}>{d.debtName}</span></td>
@@ -526,6 +567,25 @@ export const ManagerDashboard = () => {
                               <span className={`badge ${d.status === 'ACTIVE' ? 'badge-on' : 'badge-off'}`}>
                                 {d.status}
                               </span>
+                            </td>
+                            <td>
+                              <button
+                                className="btn btn-ghost"
+                                style={{ padding: '4px', color: 'var(--cyan)' }}
+                                onClick={() => {
+                                  setEditingDebtId(d.id);
+                                  setEditDebtForm({
+                                    debtName: d.debtName || '',
+                                    principalAmount: d.principalAmount || '',
+                                    outStandingAmount: d.outstandingAmount || '',
+                                    dueDate: d.dueDate || '',
+                                    status: d.status || 'ACTIVE',
+                                    customerId: d.customerId || ''
+                                  });
+                                }}
+                              >
+                                <Edit2 size={14} />
+                              </button>
                             </td>
                           </tr>
                         ))}
@@ -542,6 +602,61 @@ export const ManagerDashboard = () => {
                     <button className="btn btn-ghost" style={{ padding: '4px 12px' }} disabled={debtPage >= debtTotalPages - 1} onClick={() => setDebtPage(p => p + 1)}>Next</button>
                   </div>
                 )}
+              </div>
+            )}
+
+            {debtTab === 'list_customers' && (
+              <div className="win">
+                <div style={{ padding: '13px 20px', borderBottom: '1px solid rgba(180,200,220,0.28)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.86rem', fontWeight: 600, color: 'var(--t1)' }}>All Customers</span>
+                  <button className="btn btn-ghost" style={{ padding: '5px 11px', fontSize: '0.78rem' }} onClick={() => fetchDebtsData()}>
+                    <RefreshCw size={13} style={loadingDebts ? { animation: 'spin 0.7s linear infinite' } : {}} /> Refresh
+                  </button>
+                </div>
+                <div style={{ overflowX: 'auto' }}>
+                  {customers.length === 0 ? (
+                    <div style={{ padding: '48px 24px', textAlign: 'center', color: 'var(--t3)', fontSize: '0.86rem' }}>
+                      {loadingDebts ? 'Loading…' : 'No customers found.'}
+                    </div>
+                  ) : (
+                    <table className="gtable">
+                      <thead>
+                        <tr>
+                          <th style={{ width: 40 }}>ID</th>
+                          <th>Name</th>
+                          <th>Email</th>
+                          <th>Phone</th>
+                          <th style={{ textAlign: 'right' }}>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {customers.map(c => (
+                          <tr key={c.id}>
+                            <td>{c.id}</td>
+                            <td>{c.customerName}</td>
+                            <td>{c.email}</td>
+                            <td>{c.phoneNumber}</td>
+                            <td style={{ textAlign: 'right' }}>
+                              <button
+                                className="btn btn-ghost"
+                                style={{ padding: '4px', color: 'var(--cyan)' }}
+                                onClick={() => {
+                                  setEditingCustomerId(c.id);
+                                  setEditCustomerForm({
+                                    phoneNumber: c.phoneNumber || '',
+                                    email: c.email || ''
+                                  });
+                                }}
+                              >
+                                <Edit2 size={14} />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+                </div>
               </div>
             )}
 
@@ -731,8 +846,8 @@ export const ManagerDashboard = () => {
                 <form onSubmit={handleUpdateProfile} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                   <div className="field">
                     <label>Username</label>
-                    <input className="fi" style={{ paddingLeft: 14 }} type="text" required
-                      value={profileForm.name} onChange={e => setProfileForm(f => ({ ...f, name: e.target.value }))} />
+                    <input className="fi" style={{ paddingLeft: 14, opacity: 0.7, cursor: 'not-allowed' }} type="text"
+                      value={profileForm.name} disabled />
                   </div>
                   <div className="field">
                     <label>Company</label>
@@ -778,6 +893,93 @@ export const ManagerDashboard = () => {
         )}
 
       </div>
+      {/* Edit Debt Modal */}
+      {editingCustomerId && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 999 }}>
+          <div className="win fade-up" style={{ width: 400, background: 'var(--bg)', borderRadius: 16, overflow: 'hidden' }}>
+            <div style={{ padding: '14px 20px', borderBottom: '1px solid rgba(180,200,220,0.28)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: '0.86rem', fontWeight: 600, color: 'var(--t1)' }}>Edit Customer</span>
+              <button className="btn btn-ghost" style={{ padding: 4 }} onClick={() => setEditingCustomerId(null)}>
+                <X size={16} />
+              </button>
+            </div>
+            <form onSubmit={handleAlterCustomer} style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div className="field">
+                <label>Email</label>
+                <input className="fi" style={{ paddingLeft: 14 }} type="email" required
+                  value={editCustomerForm.email} onChange={e => setEditCustomerForm(f => ({ ...f, email: e.target.value }))} />
+              </div>
+              <div className="field">
+                <label>Phone Number</label>
+                <input className="fi" style={{ paddingLeft: 14 }} type="text" required
+                  value={editCustomerForm.phoneNumber} onChange={e => setEditCustomerForm(f => ({ ...f, phoneNumber: e.target.value }))} />
+              </div>
+              <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
+                <button type="button" className="btn btn-ghost" style={{ flex: 1 }} onClick={() => setEditingCustomerId(null)}>Cancel</button>
+                <button type="submit" className="btn btn-primary" style={{ flex: 2 }} disabled={creatingDebtOrCust}>
+                  {creatingDebtOrCust ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {editingDebtId && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 999 }}>
+          <div className="win fade-up" style={{ width: 400, background: 'var(--bg)', borderRadius: 16, overflow: 'hidden' }}>
+            <div style={{ padding: '14px 20px', borderBottom: '1px solid rgba(180,200,220,0.28)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: '0.86rem', fontWeight: 600, color: 'var(--t1)' }}>Edit Debt</span>
+              <button className="btn btn-ghost" style={{ padding: 4 }} onClick={() => setEditingDebtId(null)}>
+                <X size={16} />
+              </button>
+            </div>
+            <form onSubmit={handleAlterDebt} style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div className="field">
+                <label>Debt Name</label>
+                <input className="fi" style={{ paddingLeft: 14, opacity: 0.7, cursor: 'not-allowed' }} type="text"
+                  value={editDebtForm.debtName || ''} disabled />
+              </div>
+              <div style={{ display: 'flex', gap: 14 }}>
+                <div className="field" style={{ flex: 1 }}>
+                  <label>Principal</label>
+                  <input className="fi" style={{ paddingLeft: 14 }} type="number" required
+                    value={editDebtForm.principalAmount} onChange={e => setEditDebtForm(f => ({ ...f, principalAmount: e.target.value }))} />
+                </div>
+                <div className="field" style={{ flex: 1 }}>
+                  <label>Outstanding</label>
+                  <input className="fi" style={{ paddingLeft: 14 }} type="number" required
+                    value={editDebtForm.outStandingAmount} onChange={e => setEditDebtForm(f => ({ ...f, outStandingAmount: e.target.value }))} />
+                </div>
+              </div>
+              <div className="field">
+                <label>Due Date</label>
+                <input className="fi" style={{ paddingLeft: 14 }} type="date" required
+                  value={editDebtForm.dueDate ? new Date(editDebtForm.dueDate).toISOString().split('T')[0] : ''} 
+                  onChange={e => setEditDebtForm(f => ({ ...f, dueDate: e.target.value }))} />
+              </div>
+              <div className="field">
+                <label>Status</label>
+                <select className="fi" style={{ paddingLeft: 14 }} value={editDebtForm.status} onChange={e => setEditDebtForm(f => ({ ...f, status: e.target.value }))}>
+                  <option value="PENDING">PENDING</option>
+                  <option value="ACTIVE">ACTIVE</option>
+                  <option value="OVERDUE">OVERDUE</option>
+                  <option value="IN_COLLECTION">IN_COLLECTION</option>
+                  <option value="PARTIALLY_SETTLED">PARTIALLY_SETTLED</option>
+                  <option value="SETTLED">SETTLED</option>
+                  <option value="CLOSED">CLOSED</option>
+                </select>
+              </div>
+              <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
+                <button type="button" className="btn btn-ghost" style={{ flex: 1 }} onClick={() => setEditingDebtId(null)}>Cancel</button>
+                <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={creatingDebtOrCust}>
+                  {creatingDebtOrCust && <span className="spinner" />} Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

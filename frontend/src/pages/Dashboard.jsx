@@ -89,7 +89,7 @@ export const Dashboard = () => {
 
   const saveEdit = async (m) => {
     try {
-      await adminService.updateEmployee(m.id, { ...m, name: editForm.name, email: editForm.email });
+      await adminService.updateEmployee(m.id, editForm.email);
       notify('Manager updated successfully');
       setEditingId(null);
       fetchManagers();
@@ -109,14 +109,7 @@ export const Dashboard = () => {
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
     try {
-      await adminService.updateSelf(user.id, {
-        id: user.id,
-        name: profileForm.name,
-        company: profileForm.company,
-        email: profileForm.email,
-        role: 'ADMIN',
-        enabled: true
-      });
+      await adminService.updateSelf(user.id, profileForm.email);
       notify('Profile updated successfully');
       setUser(prev => ({ ...prev, ...profileForm }));
       setIsEditingProfile(false);
@@ -278,8 +271,8 @@ export const Dashboard = () => {
                             <td>{m.id}</td>
                             <td>
                               {isEditing ? (
-                                <input className="fi" style={{ padding: '6px 10px', fontSize: '0.8rem' }} 
-                                  value={editForm.name} onChange={e => setEditForm(f => ({ ...f, name: e.target.value }))} />
+                                <input className="fi" style={{ padding: '6px 10px', fontSize: '0.8rem', opacity: 0.7, cursor: 'not-allowed' }}
+                                  value={editForm.name} disabled />
                               ) : (
                                 <span style={{ color: 'var(--t1)', fontWeight: 500 }}>{m.name}</span>
                               )}
@@ -402,8 +395,8 @@ export const Dashboard = () => {
                 <form onSubmit={handleUpdateProfile} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                   <div className="field">
                     <label>Username</label>
-                    <input className="fi" style={{ paddingLeft: 14 }} type="text" required
-                      value={profileForm.name} onChange={e => setProfileForm(f => ({ ...f, name: e.target.value }))} />
+                    <input className="fi" style={{ paddingLeft: 14, opacity: 0.7, cursor: 'not-allowed' }} type="text"
+                      value={profileForm.name} disabled />
                   </div>
                   <div className="field">
                     <label>Company</label>

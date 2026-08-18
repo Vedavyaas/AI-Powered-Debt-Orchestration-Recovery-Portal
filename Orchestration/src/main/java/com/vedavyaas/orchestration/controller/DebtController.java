@@ -32,13 +32,8 @@ public class DebtController {
         return ResponseEntity.ok(debtService.getAllDebts(pageStart, pageSize, jwt.getSubject()));
     }
 
-    @PostMapping("/customer")
-    public ResponseEntity<String> createCustomer(@RequestBody CustomerDetails customerDetails, @AuthenticationPrincipal Jwt jwt) {
-        return ResponseEntity.ok(debtService.createCustomer(customerDetails, jwt.getSubject()));
-    }
-
-    @GetMapping("/customer")
-    public ResponseEntity<Page<CustomerDTO>> getCustomer(@RequestParam("pageStart") Integer pageStart, @RequestParam("pageSize") Integer pageSize, @AuthenticationPrincipal Jwt jwt) {
-        return ResponseEntity.ok(debtService.getCustomerInfo(pageStart, pageSize, jwt.getSubject()));
+    @PutMapping("/{id}")
+    public ResponseEntity<String> alterDebt(@PathVariable Long id, @RequestBody DebtDetails debtDetails, @AuthenticationPrincipal Jwt jwt) {
+        return ResponseEntity.ok(debtService.alterDebt(id, debtDetails, jwt.getSubject()));
     }
 }

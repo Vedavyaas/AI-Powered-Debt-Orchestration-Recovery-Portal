@@ -22,7 +22,7 @@ public class AgentController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<String> alterSelf(@PathVariable Long id, @RequestBody UserDTO userDTO, @AuthenticationPrincipal Jwt jwt) {
-        return ResponseEntity.ok(userService.alterEmployees(id, userDTO, jwt.getSubject()));
+    public ResponseEntity<String> alterSelf(@PathVariable Long id, @RequestParam String email, @AuthenticationPrincipal Jwt jwt) {
+        return ResponseEntity.ok(userService.alterEmployees(id, email, jwt.getSubject()));
     }
 }

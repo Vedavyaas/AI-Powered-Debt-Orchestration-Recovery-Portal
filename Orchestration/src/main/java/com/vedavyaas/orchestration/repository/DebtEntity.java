@@ -31,6 +31,8 @@ public class DebtEntity {
     private Instant createdAt;
     private Instant modifiedAt;
 
+    private boolean sent;
+
     public DebtEntity() {
     }
 
@@ -43,6 +45,7 @@ public class DebtEntity {
         this.dueDate = dueDate;
         this.status = status;
         this.createdAt = this.modifiedAt = Instant.now();
+        this.sent = false;
     }
 
     public void setId(Long id) {
@@ -123,5 +126,13 @@ public class DebtEntity {
 
     public void setModifiedAt(Instant modifiedAt) {
         this.modifiedAt = modifiedAt;
+    }
+
+    public boolean isSent() {
+        return sent;
+    }
+
+    public void setSent(boolean sent) {
+        this.sent = sent;
     }
 }

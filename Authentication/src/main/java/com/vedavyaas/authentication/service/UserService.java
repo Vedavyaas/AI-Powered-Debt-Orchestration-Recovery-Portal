@@ -150,7 +150,7 @@ public class UserService {
         return userRepository.findByCompany_NameAndRole(companyName, role, pageable);
     }
 
-    public String alterEmployees(Long id, UserDTO userDTO, String admin) {
+    public String alterEmployees(Long id, String email, String admin) {
         Optional<UserEntity> user = userRepository.findById(id);
 
         if (user.isEmpty()) {
@@ -158,19 +158,10 @@ public class UserService {
             throw new InvalidCredentialException("User not found.");
         }
 
-        boolean modified = false;
-        if (userDTO.name() != null && !userDTO.name().equals(user.get().getName())) {
-            if (userRepository.existsByName(userDTO.name())) throw new InvalidCredentialException("Username is already taken.");
-            user.get().setName(userDTO.name());
-            modified = true;
-        }
-        if (userDTO.email() != null && !userDTO.email().equals(user.get().getEmail())) {
-            if (userRepository.existsByEmail(userDTO.email())) throw new InvalidCredentialException("Email is already taken.");
-            user.get().setEmail(userDTO.email());
-            modified = true;
-        }
+        if (email != null && !email.equals(user.get().getEmail())) {
+            if (userRepository.existsByEmail(email)) throw new InvalidCredentialException("Email is already taken.");
+            user.get().setEmail(email);
 
-        if (modified) {
             user.get().setModifiedAt(Instant.now());
             userRepository.save(user.get());
             logger.info("{} : {}, altered manager details successfully.", user.get().getRole().toString(), admin);

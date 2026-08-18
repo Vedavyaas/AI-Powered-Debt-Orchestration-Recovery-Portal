@@ -17,8 +17,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.nio.DoubleBuffer;
 import java.sql.Date;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -183,5 +183,74 @@ public class DebtService {
 
         return customerEntity.get();
 
+    }
+
+    public String alterDebt(Long id, DebtDetails debtDetails, String managerName) {
+        Optional<DebtEntity> debtEntity = debtRepository.findById(id);
+
+        if (debtEntity.isEmpty()) {
+            logger.warn("Manager : {}, tried to change debt but failed.", managerName);
+            throw new InvalidCredentialsException("Some error occurred.");
+        }
+
+        boolean modified = false;
+        if (debtDetails.dueDate() != null && !debtDetails.dueDate().equals(debtEntity.get().getDueDate())) {
+            debtEntity.get().setDueDate(debtDetails.dueDate());
+            modified = true;
+        }
+        if (debtDetails.principalAmount() != null && !debtDetails.principalAmount().equals(debtEntity.get().getPrincipalAmount())) {
+            debtEntity.get().setPrincipalAmount(debtDetails.principalAmount());
+            modified = true;
+        }
+        if (debtDetails.outStandingAmount() != null && !debtDetails.outStandingAmount().equals(debtEntity.get().getOutstandingAmount())) {
+            debtEntity.get().setOutstandingAmount(debtDetails.outStandingAmount());
+            modified = true;
+        }
+        if (!debtDetails.status().equals(debtEntity.get().getStatus())) {
+            debtEntity.get().setStatus(debtDetails.status());
+            modified = true;
+        }
+
+        if (modified) {
+            debtEntity.get().setSent(false);
+            debtEntity.get().setModifiedAt(Instant.now());
+            debtRepository.save(debtEntity.get());
+
+            logger.info("Manager : {}, successfully changed the debt.", managerName);
+            return "Debt changed successfully.";
+        }
+
+        logger.warn("Manager : {}, tried to change the debt but failed.", managerName);
+        throw new InvalidCredentialsException("No data to change.");
+    }
+
+    public String alterCustomer(Long id, String phoneNumber, String email, String managerName) {
+        Optional<CustomerEntity> customerEntity = customerRepository.findById(id);
+
+        if (customerEntity.isEmpty()) {
+            logger.warn("Manager : {}, tried to alter customer but failed.", managerName);
+            throw new InvalidCredentialsException("Some error occurred.");
+        }
+
+        boolean modified = false;
+
+        if (phoneNumber != null && !customerEntity.get().getPhoneNumber().equals(phoneNumber)) {
+            customerEntity.get().setPhoneNumber(phoneNumber);
+            modified = true;
+        }
+
+        if (email != null && !customerEntity.get().getEmail().equals(email)) {
+            customerEntity.get().setEmail(email);
+            modified = true;
+        }
+
+        if (modified) {
+             customerRepository.save(customerEntity.get());
+            logger.info("Manager : {}, modified customer details.", managerName);
+            return "Modified successfully.";
+        }
+
+        logger.warn("Manager : {}, tried to modify customer but failed.", managerName);
+        return "No changes to modify.";
     }
 }

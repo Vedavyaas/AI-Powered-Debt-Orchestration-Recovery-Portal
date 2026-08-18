@@ -42,8 +42,8 @@ export const authService = {
 
 // Admin Management Service Endpoints
 export const adminService = {
-  updateSelf: async (id, userDTO) => {
-    const response = await api.put(`/api/admin/${id}`, userDTO);
+  updateSelf: async (id, email) => {
+    const response = await api.put(`/api/admin/${id}`, null, { params: { email } });
     return response.data;
   },
 
@@ -64,8 +64,8 @@ export const adminService = {
     return response.data;
   },
 
-  updateEmployee: async (id, userDTO) => {
-    const response = await api.put(`/api/admin/employee/${id}`, userDTO);
+  updateEmployee: async (id, email) => {
+    const response = await api.put(`/api/admin/employee/${id}`, null, { params: { email } });
     return response.data;
   },
 };
@@ -77,8 +77,8 @@ export const managerService = {
     return response.data;
   },
 
-  updateSelf: async (id, userDTO) => {
-    const response = await api.put(`/api/manager/${id}`, userDTO);
+  updateSelf: async (id, email) => {
+    const response = await api.put(`/api/manager/${id}`, null, { params: { email } });
     return response.data;
   },
 
@@ -99,8 +99,8 @@ export const managerService = {
     return response.data;
   },
 
-  updateEmployee: async (id, userDTO) => {
-    const response = await api.put(`/api/manager/employee/${id}`, userDTO);
+  updateEmployee: async (id, email) => {
+    const response = await api.put(`/api/manager/employee/${id}`, null, { params: { email } });
     return response.data;
   },
 };
@@ -112,8 +112,8 @@ export const agentService = {
     return response.data;
   },
 
-  updateSelf: async (id, userDTO) => {
-    const response = await api.put(`/api/agent/${id}`, userDTO);
+  updateSelf: async (id, email) => {
+    const response = await api.put(`/api/agent/${id}`, null, { params: { email } });
     return response.data;
   },
 };
@@ -147,12 +147,22 @@ export const orchestrationService = {
     const response = await orchApi.get('/api/debt/customer', { params: { pageStart, pageSize } });
     return response.data;
   },
+  alterCustomer: async (id, phoneNumber, email) => {
+    const response = await orchApi.put(`/api/debt/customer/${id}`, null, {
+      params: { phoneNumber, email }
+    });
+    return response.data;
+  },
   createDebt: async (debtData) => {
     const response = await orchApi.post('/api/debt', debtData);
     return response.data;
   },
   getDebts: async (pageStart = 0, pageSize = 100) => {
     const response = await orchApi.get('/api/debt', { params: { pageStart, pageSize } });
+    return response.data;
+  },
+  alterDebt: async (id, debtData) => {
+    const response = await orchApi.put(`/api/debt/${id}`, debtData);
     return response.data;
   },
   bulkIngestion: async (file) => {
