@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.BufferedReader;
@@ -30,11 +31,13 @@ public class DebtService {
     private final DebtRepository debtRepository;
     private final ManagerRepository managerRepository;
     private final CustomerRepository customerRepository;
+    private final KafkaService kafkaService;
 
-    public DebtService(DebtRepository debtRepository, ManagerRepository managerRepository, CustomerRepository customerRepository) {
+    public DebtService(DebtRepository debtRepository, ManagerRepository managerRepository, CustomerRepository customerRepository, KafkaService kafkaService) {
         this.debtRepository = debtRepository;
         this.managerRepository = managerRepository;
         this.customerRepository = customerRepository;
+        this.kafkaService = kafkaService;
     }
 
     public String createDebt(DebtDetails debtDetails, String managerName) {
@@ -185,6 +188,7 @@ public class DebtService {
 
     }
 
+    @Transactional
     public String alterDebt(Long id, DebtDetails debtDetails, String managerName) {
         Optional<DebtEntity> debtEntity = debtRepository.findById(id);
 
@@ -207,6 +211,8 @@ public class DebtService {
             modified = true;
         }
         if (!debtDetails.status().equals(debtEntity.get().getStatus())) {
+            if (debtEntity.get().getStatus().equals(Status.CLOSED)) kafkaService.sendMessageStatus(debtDetails.debtName(), "false");
+            if (debtDetails.status().equals(Status.CLOSED)) kafkaService.sendMessageStatus(debtDetails.debtName(), "true");
             debtEntity.get().setStatus(debtDetails.status());
             modified = true;
         }

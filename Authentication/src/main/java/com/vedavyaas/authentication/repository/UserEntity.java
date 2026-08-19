@@ -27,6 +27,7 @@ public class UserEntity {
     private Instant createdAt;
     private Instant modifiedAt;
     private boolean enabled;
+    private boolean sent;
 
     public UserEntity() {
     }
@@ -39,6 +40,7 @@ public class UserEntity {
         this.company = company;
         this.createdAt = this.modifiedAt = Instant.now();
         this.enabled = true;
+        this.sent = false;
     }
 
     public void setId(Long id) {
@@ -111,5 +113,13 @@ public class UserEntity {
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
+    }
+
+    public boolean isSent() {
+        return sent;
+    }
+
+    public void setSent(boolean sent) {
+        this.sent = sent;
     }
 }

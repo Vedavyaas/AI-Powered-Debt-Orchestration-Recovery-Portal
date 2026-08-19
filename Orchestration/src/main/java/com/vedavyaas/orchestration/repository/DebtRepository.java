@@ -14,4 +14,6 @@ public interface DebtRepository extends JpaRepository<DebtEntity, Long> {
            "FROM DebtEntity d JOIN d.customerEntity c JOIN d.managerName m " +
            "WHERE m.managerName = :managerName")
     Page<com.vedavyaas.orchestration.model.DebtDTO> findByManagerName_ManagerName(@Param("managerName") String managerName, Pageable pageable);
+
+    Page<DebtEntity> findBySent(boolean sent, Pageable pageable);
 }

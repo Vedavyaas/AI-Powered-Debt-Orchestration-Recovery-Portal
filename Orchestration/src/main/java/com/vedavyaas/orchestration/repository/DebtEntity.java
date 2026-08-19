@@ -30,7 +30,6 @@ public class DebtEntity {
     private Status status;
     private Instant createdAt;
     private Instant modifiedAt;
-
     private boolean sent;
 
     public DebtEntity() {

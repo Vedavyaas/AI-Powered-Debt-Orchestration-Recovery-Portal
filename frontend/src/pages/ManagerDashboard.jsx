@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { managerService, orchestrationService } from '../services/api';
+import { managerService, orchestrationService, assignmentService } from '../services/api';
 import {
   UserPlus, Users, User, LogOut,
   Building, Mail, Power,
   RefreshCw, CheckCircle2, AlertCircle,
-  Briefcase, Wallet, CreditCard, UploadCloud, Download, Edit2, X
+  Briefcase, Wallet, CreditCard, UploadCloud, Download, Edit2, X, Info, ChevronLeft, Loader2
 } from 'lucide-react';
 
 const NAV = [
@@ -43,6 +43,13 @@ export const ManagerDashboard = () => {
   
   const [editingDebtId, setEditingDebtId] = useState(null);
   const [editDebtForm, setEditDebtForm] = useState({ debtName: '', customerId: '', principalAmount: '', outStandingAmount: '', dueDate: '', status: 'ACTIVE' });
+
+  // Assignment specifics for a single debt
+  const [selectedDebtAssignment, setSelectedDebtAssignment] = useState(null); // the debt object from orchestration to display
+  const [assignmentDetails, setAssignmentDetails] = useState(null); // data from assignmentService
+  const [assignmentLoading, setAssignmentLoading] = useState(false);
+  const [swapAgentName, setSwapAgentName] = useState('');
+  const [swapping, setSwapping] = useState(false);
 
   const [editingCustomerId, setEditingCustomerId] = useState(null);
   const [editCustomerForm, setEditCustomerForm] = useState({ phoneNumber: '', email: '' });
@@ -122,6 +129,41 @@ export const ManagerDashboard = () => {
       fetchDebtsData();
     }
   }, [page, tab]);
+
+  const handleOpenAssignment = async (debt) => {
+    setSelectedDebtAssignment(debt);
+    setAssignmentLoading(true);
+    setAssignmentDetails(null);
+    try {
+      // The API returns null or 404 if not yet computed
+      const data = await assignmentService.getSpecificDebt(debt.debtName);
+      setAssignmentDetails(data);
+      if (data && data.agentName) {
+        setSwapAgentName(data.agentName);
+      }
+    } catch (err) {
+      if (err.response?.status !== 404) {
+        notify('Failed to fetch computation details', 'error');
+      }
+    } finally {
+      setAssignmentLoading(false);
+    }
+  };
+
+  const handleSwapAgent = async (e) => {
+    e.preventDefault();
+    if (!swapAgentName || !assignmentDetails) return;
+    setSwapping(true);
+    try {
+      const msg = await assignmentService.changeAgent(assignmentDetails.id, swapAgentName);
+      notify(msg || 'Agent swapped successfully');
+      setAssignmentDetails(prev => ({ ...prev, agentName: swapAgentName }));
+    } catch (err) {
+      notify(err.response?.data?.message || 'Failed to swap agent', 'error');
+    } finally {
+      setSwapping(false);
+    }
+  };
 
   const handleCreateCustomer = async (e) => {
     e.preventDefault();
@@ -525,7 +567,7 @@ export const ManagerDashboard = () => {
               </button>
             </div>
 
-            {debtTab === 'list_debts' && (
+            {debtTab === 'list_debts' && !selectedDebtAssignment && (
               <div className="win">
                 <div style={{ padding: '13px 20px', borderBottom: '1px solid rgba(180,200,220,0.28)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ fontSize: '0.86rem', fontWeight: 600, color: 'var(--t1)' }}>All Debts</span>
@@ -569,23 +611,34 @@ export const ManagerDashboard = () => {
                               </span>
                             </td>
                             <td>
-                              <button
-                                className="btn btn-ghost"
-                                style={{ padding: '4px', color: 'var(--cyan)' }}
-                                onClick={() => {
-                                  setEditingDebtId(d.id);
-                                  setEditDebtForm({
-                                    debtName: d.debtName || '',
-                                    principalAmount: d.principalAmount || '',
-                                    outStandingAmount: d.outstandingAmount || '',
-                                    dueDate: d.dueDate || '',
-                                    status: d.status || 'ACTIVE',
-                                    customerId: d.customerId || ''
-                                  });
-                                }}
-                              >
-                                <Edit2 size={14} />
-                              </button>
+                              <div style={{ display: 'flex', gap: 6 }}>
+                                <button
+                                  title="Edit Debt"
+                                  className="btn btn-ghost"
+                                  style={{ padding: '4px', color: 'var(--cyan)' }}
+                                  onClick={() => {
+                                    setEditingDebtId(d.id);
+                                    setEditDebtForm({
+                                      debtName: d.debtName || '',
+                                      principalAmount: d.principalAmount || '',
+                                      outStandingAmount: d.outstandingAmount || '',
+                                      dueDate: d.dueDate || '',
+                                      status: d.status || 'ACTIVE',
+                                      customerId: d.customerId || ''
+                                    });
+                                  }}
+                                >
+                                  <Edit2 size={14} />
+                                </button>
+                                <button
+                                  title="View Assignment/Computation"
+                                  className="btn btn-ghost"
+                                  style={{ padding: '4px', color: 'var(--blue)' }}
+                                  onClick={() => handleOpenAssignment(d)}
+                                >
+                                  <Info size={14} />
+                                </button>
+                              </div>
                             </td>
                           </tr>
                         ))}
@@ -602,6 +655,93 @@ export const ManagerDashboard = () => {
                     <button className="btn btn-ghost" style={{ padding: '4px 12px' }} disabled={debtPage >= debtTotalPages - 1} onClick={() => setDebtPage(p => p + 1)}>Next</button>
                   </div>
                 )}
+              </div>
+            )}
+
+            {debtTab === 'list_debts' && selectedDebtAssignment && (
+              <div className="fade-up" style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                <button className="btn btn-ghost" style={{ alignSelf: 'flex-start', padding: '6px 12px' }} onClick={() => setSelectedDebtAssignment(null)}>
+                  <ChevronLeft size={16} /> Back to List
+                </button>
+                
+                <div className="win" style={{ padding: '24px' }}>
+                  <div style={{ marginBottom: 20, paddingBottom: 16, borderBottom: '1px solid rgba(180,200,220,0.28)' }}>
+                    <h2 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--t1)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <Info size={20} color="#1d4ed8" /> Assignment Info: {selectedDebtAssignment.debtName}
+                    </h2>
+                  </div>
+
+                  {assignmentLoading ? (
+                    <div style={{ padding: '30px', textAlign: 'center', color: 'var(--t3)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+                      <Loader2 className="spinner" size={24} color="#1d4ed8" />
+                      Loading assignment data...
+                    </div>
+                  ) : !assignmentDetails ? (
+                    <div style={{ padding: '30px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
+                      <div style={{ color: 'var(--t2)', fontSize: '0.95rem' }}>
+                        The computation is still in progress.
+                      </div>
+                      <button className="btn btn-primary" onClick={() => handleOpenAssignment(selectedDebtAssignment)}>
+                        <RefreshCw size={14} /> Try Again
+                      </button>
+                    </div>
+                  ) : (
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+                      {/* Computation Details */}
+                      <div>
+                        <h3 style={{ margin: '0 0 16px 0', fontSize: '0.95rem', color: 'var(--t1)' }}>Computation Info</h3>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 14px', background: 'rgba(240,245,250,0.5)', borderRadius: 8 }}>
+                            <span style={{ color: 'var(--t2)', fontSize: '0.85rem' }}>Recovery Probability</span>
+                            <span style={{ color: 'var(--t1)', fontWeight: 600 }}>{assignmentDetails.recoveryProbability !== null ? assignmentDetails.recoveryProbability : 'N/A'}</span>
+                          </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 14px', background: 'rgba(240,245,250,0.5)', borderRadius: 8 }}>
+                            <span style={{ color: 'var(--t2)', fontSize: '0.85rem' }}>Trust Score</span>
+                            <span style={{ color: 'var(--t1)', fontWeight: 600 }}>{assignmentDetails.trustScore !== null ? assignmentDetails.trustScore : 'N/A'}</span>
+                          </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 14px', background: 'rgba(240,245,250,0.5)', borderRadius: 8 }}>
+                            <span style={{ color: 'var(--t2)', fontSize: '0.85rem' }}>Current Agent</span>
+                            <span style={{ color: 'var(--blue)', fontWeight: 600 }}>{assignmentDetails.agentName}</span>
+                          </div>
+                        </div>
+                        
+                        <div style={{ marginTop: 24 }}>
+                          <h3 style={{ margin: '0 0 12px 0', fontSize: '0.9rem', color: 'var(--t1)' }}>Sight Information (Notes)</h3>
+                          {assignmentDetails.sightInformation && assignmentDetails.sightInformation.length > 0 ? (
+                            <ul style={{ margin: 0, paddingLeft: 20, color: 'var(--t2)', fontSize: '0.85rem', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                              {assignmentDetails.sightInformation.map((note, idx) => (
+                                <li key={idx}>{note}</li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <div style={{ color: 'var(--t3)', fontSize: '0.85rem' }}>No notes provided.</div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Override Agent Form */}
+                      <div>
+                        <h3 style={{ margin: '0 0 16px 0', fontSize: '0.95rem', color: 'var(--t1)' }}>Override Agent</h3>
+                        <form onSubmit={handleSwapAgent} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                          <div className="field">
+                            <label>Select Agent</label>
+                            <select className="fi" style={{ paddingLeft: 14, backgroundColor: 'transparent' }} required
+                              value={swapAgentName} onChange={e => setSwapAgentName(e.target.value)}>
+                              <option value="">-- Choose Agent --</option>
+                              {agents.filter(a => a.enabled !== false).map(a => (
+                                <option key={a.id} value={a.name}>{a.name} ({a.email})</option>
+                              ))}
+                            </select>
+                            {agents.length === 0 && <span style={{ fontSize: '0.75rem', color: '#b91c1c', marginTop: 4 }}>No active agents found.</span>}
+                          </div>
+                          <button type="submit" className="btn btn-primary" style={{ alignSelf: 'flex-start' }} disabled={swapping || !swapAgentName || agents.length === 0}>
+                            {swapping ? 'Reassigning...' : 'Reassign Debt'}
+                          </button>
+                        </form>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 

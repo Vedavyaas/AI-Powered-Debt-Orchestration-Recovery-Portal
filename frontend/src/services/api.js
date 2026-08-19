@@ -178,3 +178,47 @@ export const orchestrationService = {
 };
 
 export default api;
+
+const ASSIGN_API_BASE_URL = 'http://localhost:9000/ASSIGNMENT';
+
+const assignApi = axios.create({
+  baseURL: ASSIGN_API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+assignApi.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('dca_auth_token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+export const assignmentService = {
+  getDebts: async (pageStart = 0, pageSize = 100) => {
+    const response = await assignApi.get('/api/assignment', { params: { pageStart, pageSize } });
+    return response.data;
+  },
+  getSpecificDebt: async (debtName) => {
+    const response = await assignApi.get(`/api/assignment/debt/${debtName}`);
+    return response.data;
+  },
+  changeStatus: async (id, status) => {
+    const response = await assignApi.patch(`/api/assignment/${id}`, null, { params: { status } });
+    return response.data;
+  },
+  addDetails: async (id, notes) => {
+    // API expects a List<String> which maps to multiple 'notes' query params or a comma separated string
+    const response = await assignApi.put(`/api/assignment/${id}`, null, { params: { notes } });
+    return response.data;
+  },
+  changeAgent: async (id, agentName) => {
+    const response = await assignApi.patch(`/api/assignment/agent/${id}`, null, { params: { agentName } });
+    return response.data;
+  },
+};
