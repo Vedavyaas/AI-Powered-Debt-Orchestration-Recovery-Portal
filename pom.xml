@@ -14,5 +14,6 @@
     <module>Authentication</module>
     <module>Orchestration</module>
     <module>Assignment</module>
+    <module>MLService</module>
   </modules>
 </project>

@@ -24,7 +24,7 @@ public class KafkaService {
     @Transactional
     @Scheduled(fixedDelay = 1_000)
     public void sendMessage() {
-        Pageable pageable = PageRequest.of(1, 30);
+        Pageable pageable = PageRequest.of(0, 30);
         Page<UserEntity> userEntities = userRepository.findByRoleAndSent(Role.AGENT, false, pageable);
 
         if (userEntities.isEmpty()) return;

@@ -95,7 +95,7 @@ public class UserService {
             Optional<UserEntity> adminUser = userRepository.findByName(adminName);
 
             if (adminUser.isEmpty()) {
-                logger.warn("{} : {}, tried to create {} account but failed.", adminUser.get().getRole().toString(), adminName, accountCredentials.role().toString());
+                logger.warn("Admin : {}, tried to create {} account but failed.", adminName, accountCredentials.role().toString());
                 throw new InvalidCredentialException("Some error occurred. Try logging in again!");
             }
 
@@ -131,7 +131,7 @@ public class UserService {
 
         user.get().setEnabled(!user.get().isEnabled());
         userRepository.save(user.get());
-        logger.info("Admin : {}, toggled {} successfully.", user.get().getName(), admin);
+        logger.info("Admin : {}, toggled {} successfully.", admin, user.get().getName());
         return user.get().isEnabled() ? "User enabled successfully." : "User disabled successfully";
     }
 

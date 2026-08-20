@@ -10,6 +10,7 @@
         <option value="$PROJECT_DIR$/Authentication/pom.xml" />
         <option value="$PROJECT_DIR$/Orchestration/pom.xml" />
         <option value="$PROJECT_DIR$/Assignment/pom.xml" />
+        <option value="$PROJECT_DIR$/MLService/pom.xml" />
       </list>
     </option>
   </component>

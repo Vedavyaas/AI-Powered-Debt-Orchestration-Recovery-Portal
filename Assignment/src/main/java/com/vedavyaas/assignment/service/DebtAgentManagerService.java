@@ -128,11 +128,19 @@ public class DebtAgentManagerService {
             throw new InvalidCredentialException("Some error occurred.");
         }
 
-        if (!debtEntity.get().getNiceValue().equals(-1)) {
+        if (!debtEntity.get().isCalculated()) {
             //"Computation still in-progress"
             return null;
         }
 
-        return new DebtDTO(debtEntity.get().getId(), debtEntity.get().getDebtName(), debtEntity.get().getAgentEntity().getAgentName(), debtEntity.get().getManagerEntity().getManagerName(), debtEntity.get().getRecoveryProbability(), debtEntity.get().getTrustScore(), debtEntity.get().getSightInformation());
+        return new DebtDTO(
+                debtEntity.get().getId(),
+                debtEntity.get().getDebtName(),
+                debtEntity.get().getAgentEntity() != null ? debtEntity.get().getAgentEntity().getAgentName() : null,
+                debtEntity.get().getManagerEntity() != null ? debtEntity.get().getManagerEntity().getManagerName() : null,
+                debtEntity.get().getRecoveryProbability(),
+                debtEntity.get().getTrustScore(),
+                debtEntity.get().getSightInformation()
+        );
     }
 }

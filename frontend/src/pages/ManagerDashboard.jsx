@@ -32,6 +32,7 @@ export const ManagerDashboard = () => {
   const [debtTotalPages, setDebtTotalPages] = useState(0);
   const [debtTab, setDebtTab] = useState('list_debts'); // list_debts, create_customer, create_debt
   const [createMode, setCreateMode] = useState('single'); // single, bulk
+  const [calculatedMap, setCalculatedMap] = useState({}); // debtName -> boolean
   const [customerForm, setCustomerForm] = useState({ name: '', email: '', phoneNumber: '' });
   const [debtForm, setDebtForm] = useState({ debtName: '', customerId: '', principalAmount: '', outStandingAmount: '', dueDate: '', status: 'ACTIVE' });
   const [creatingDebtOrCust, setCreatingDebtOrCust] = useState(false);
@@ -115,6 +116,19 @@ export const ManagerDashboard = () => {
       });
       setDebts(sortedDebts);
       setDebtTotalPages(Math.ceil(sortedDebts.length / 5) || 1);
+
+      // Fetch computed status for each debt from the Assignment service
+      const entries = await Promise.all(
+        sortedDebts.map(async (d) => {
+          try {
+            const result = await assignmentService.getSpecificDebt(d.debtName);
+            return [d.debtName, result !== null];
+          } catch {
+            return [d.debtName, false];
+          }
+        })
+      );
+      setCalculatedMap(Object.fromEntries(entries));
     } catch (err) {
       console.error(err);
     } finally {
@@ -591,6 +605,7 @@ export const ManagerDashboard = () => {
                           <th>Outstanding</th>
                           <th>Due Date</th>
                           <th>Status</th>
+                          <th>Computed</th>
                           <th>Actions</th>
                         </tr>
                       </thead>
@@ -609,6 +624,15 @@ export const ManagerDashboard = () => {
                               <span className={`badge ${d.status === 'ACTIVE' ? 'badge-on' : 'badge-off'}`}>
                                 {d.status}
                               </span>
+                            </td>
+                            <td>
+                              {calculatedMap[d.debtName] === true ? (
+                                <span className="badge badge-on" style={{ gap: 4 }}>Computed</span>
+                              ) : calculatedMap[d.debtName] === false ? (
+                                <span className="badge badge-off" style={{ gap: 3, fontSize: '0.65rem', padding: '2px 6px' }}>Pending</span>
+                              ) : (
+                                <span style={{ color: 'var(--t3)', fontSize: '0.75rem' }}>…</span>
+                              )}
                             </td>
                             <td>
                               <div style={{ display: 'flex', gap: 6 }}>

@@ -11,6 +11,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.SimpleDateFormat;
+
 
 @Service
 public class KafkaService {
@@ -25,12 +27,23 @@ public class KafkaService {
     @Transactional
     @Scheduled(fixedDelay = 5_000)
     public void sendMessage() {
-        Pageable pageable = PageRequest.of(1, 30);
+        Pageable pageable = PageRequest.of(0, 30);
         Page<DebtEntity> debtEntities = debtRepository.findBySent(false, pageable);
 
+        SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
+
         for (var debt : debtEntities) {
-            DebtKafkaModel debtKafkaModel = new DebtKafkaModel(debt.getDebtName(), debt.getManagerName().getManagerName());
+            String managerName = debt.getManagerName().getManagerName();
+
+            DebtKafkaModel debtKafkaModel = new DebtKafkaModel(debt.getDebtName(), managerName);
             kafkaTemplate.send("debt-topic", debtKafkaModel.debtName() + "EOF" + debtKafkaModel.managerName());
+
+            String message = debt.getDebtName()
+                    + "EOF" + managerName
+                    + "EOF" + debt.getPrincipalAmount()
+                    + "EOF" + debt.getOutstandingAmount()
+                    + "EOF" + formatter.format(debt.getDueDate());
+            kafkaTemplate.send("debt-request-topic", message);
             debt.setSent(true);
         }
 
