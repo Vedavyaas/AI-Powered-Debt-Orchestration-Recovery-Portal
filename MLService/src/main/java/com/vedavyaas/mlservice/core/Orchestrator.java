@@ -1,12 +1,10 @@
 package com.vedavyaas.mlservice.core;
 
-import com.vedavyaas.mlservice.controller.KafkaController;
 import com.vedavyaas.mlservice.model.DebtModel;
 import com.vedavyaas.mlservice.model.PredictionModel;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.api.preprocessor.NormalizerStandardize;
 import org.nd4j.linalg.factory.Nd4j;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -17,11 +15,9 @@ import java.time.temporal.ChronoUnit;
 public class Orchestrator {
 
     private final ModelTrainingService modelTrainingService;
-    private final KafkaController kafkaController;
 
-    public Orchestrator(ModelTrainingService modelTrainingService, @Lazy KafkaController kafkaController) {
+    public Orchestrator(ModelTrainingService modelTrainingService) {
         this.modelTrainingService = modelTrainingService;
-        this.kafkaController = kafkaController;
     }
 
     public PredictionModel calculateScore(DebtModel debtModel) {
@@ -57,17 +53,12 @@ public class Orchestrator {
         recoveryProbability = Math.max(0.0, Math.min(1.0, recoveryProbability));
         trustScore          = Math.max(0.0, Math.min(1.0, trustScore));
 
-        PredictionModel predictionModel = new PredictionModel(
+        return new PredictionModel(
                 debtModel.debtName(),
                 debtModel.managerName(),
                 recoveryProbability,
                 trustScore,
                 niceValue
         );
-
-        // --- Publish result back to Kafka ---
-        kafkaController.sendMessage(predictionModel);
-
-        return predictionModel;
     }
 }

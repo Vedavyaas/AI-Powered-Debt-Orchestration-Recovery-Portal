@@ -14,11 +14,13 @@ public class KafkaService {
     private final AgentRepository agentRepository;
     private final DebtRepository debtRepository;
     private final ManagerRepository managerRepository;
+    private final AgentAssignmentService agentAssignmentService;
 
-    public KafkaService(AgentRepository agentRepository, DebtRepository debtRepository, ManagerRepository managerRepository) {
+    public KafkaService(AgentRepository agentRepository, DebtRepository debtRepository, ManagerRepository managerRepository, AgentAssignmentService agentAssignmentService) {
         this.agentRepository = agentRepository;
         this.debtRepository = debtRepository;
         this.managerRepository = managerRepository;
+        this.agentAssignmentService = agentAssignmentService;
     }
 
     @KafkaListener(topics = "agent-topic", groupId = "assignGroup")
@@ -80,6 +82,8 @@ public class KafkaService {
             debtEntity.get().setRecoveryProbability(Double.parseDouble(input[2]));
             debtEntity.get().setTrustScore(Double.parseDouble(input[3]));
             debtEntity.get().setNiceValue(Integer.parseInt(input[4]));
+            agentAssignmentService.assignAgent(debtEntity.get());
+            //set agent
 
             debtRepository.save(debtEntity.get());
         }
@@ -103,5 +107,21 @@ public class KafkaService {
             if (debtEntity.get().getStatus().equals(Status.APPROVED)) debtEntity.get().setStatus(Status.PENDING);
         }
         debtRepository.save(debtEntity.get());
+    }
+
+    @KafkaListener(topics = "agent-score-topic", groupId = "assignGroup")
+    public void receiveAgentScore(String message) {
+        //agent_name, trust_score, nice_value
+        String[] input = message.split("EOF");
+        Optional<AgentEntity> agentEntity = agentRepository.findByAgentName(input[0]);
+
+        if (agentEntity.isEmpty()) {
+            //skip
+            return;
+        }
+
+        agentEntity.get().setNiceValue((int) Math.round(Double.parseDouble(input[2].trim())));
+        agentEntity.get().setTrustScore(Double.parseDouble(input[1].trim()));
+        agentRepository.save(agentEntity.get());
     }
 }

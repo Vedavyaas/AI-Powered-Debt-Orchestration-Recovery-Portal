@@ -117,6 +117,9 @@ public class DebtEntity {
     }
 
     public void setSightInformation(List<String> sightInformation) {
+        if (this.sightInformation == null) {
+            this.sightInformation = new ArrayList<>();
+        }
         this.sightInformation.addAll(sightInformation);
     }
 
